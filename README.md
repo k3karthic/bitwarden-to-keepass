@@ -30,6 +30,6 @@ The script can be run using the following command,
 python convert.py -o <path to output kdbx>
 ```
 
-You will be prompted for the BitWarden vault password only once at the start.
+You will be prompted for your BitWarden vault password only once at the start.
 
 ![screenshot of run](https://github.com/k3karthic/bitwarden-to-keepass/raw/main/assets/screenshot.png)
