@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 ##
-## Imports
+# Imports
 ##
 
-#import pdb
+# import pdb
 
 import argparse
 import getpass
@@ -16,15 +16,16 @@ import json
 import pykeepass
 
 ##
-## Functions
+# Functions
 ##
 
-def fetchBWFolders(passw):
+
+def fetch_bitwarden_folders(password):
     print("Fetching folders...")
 
     r = subprocess.run(
         ["bw", "list", "folders"],
-        input=passw.encode('utf-8'),
+        input=password.encode('utf-8'),
         stderr=sys.stderr,
         stdout=subprocess.PIPE
     )
@@ -35,12 +36,13 @@ def fetchBWFolders(passw):
     except json.decoder.JSONDecodeError:
         sys.exit(-1)
 
-def fetchBWItems(passw):
+
+def fetch_bitwarden_items(password):
     print("Fetching items...")
 
     r = subprocess.run(
         ["bw", "list", "items"],
-        input=passw.encode('utf-8'),
+        input=password.encode('utf-8'),
         stderr=sys.stderr,
         stdout=subprocess.PIPE
     )
@@ -51,45 +53,47 @@ def fetchBWItems(passw):
     except json.decoder.JSONDecodeError:
         sys.exit(-1)
 
-def createKPGroups(kp, foldersList):
-    d = {}
-    
-    for x in foldersList:
+
+def create_keepass_groups(kp, folders_list):
+    groups_dict = {}
+
+    for x in folders_list:
         name = x['name'].split('/')
 
-        g = None
+        group = None
         parent = kp.root_group
         for n in name:
             if n == 'No Folder':
-                g = kp.root_group
+                group = kp.root_group
                 break
 
-            if n not in d:
-                g = kp.add_group(parent, n)
-                d[n] = g
-            
-            parent = d[n]
-        
-        d[x['id']] = g
+            if n not in groups_dict:
+                group = kp.add_group(parent, n)
+                groups_dict[n] = group
 
-    return d
+            parent = groups_dict[n]
+
+        groups_dict[x['id']] = group
+
+    return groups_dict
+
 
 def convert(output):
-    passw = getpass.getpass('Master Password: ')
+    password = getpass.getpass('Master Password: ')
     print('')
 
-    kp = pykeepass.create_database(output, password=passw)
+    kp = pykeepass.create_database(output, password=password)
 
-    foldersList = fetchBWFolders(passw)
-    groups = createKPGroups(kp, foldersList)
-    
-    itemsList = fetchBWItems(passw)
+    folders_list = fetch_bitwarden_folders(password)
+    groups = create_keepass_groups(kp, folders_list)
+
+    items_list = fetch_bitwarden_items(password)
     print('')
 
-    for x in itemsList:
-        destGroup = kp.root_group
+    for x in items_list:
+        dest_group = kp.root_group
         if x['folderId'] in groups:
-            destGroup = groups[x['folderId']]
+            dest_group = groups[x['folderId']]
 
         url = None
         if 'uris' in x['login'] and len(x['login']['uris']) > 0:
@@ -103,8 +107,8 @@ def convert(output):
         if password is None:
             password = ''
 
-        entry = kp.add_entry(
-            destGroup,
+        kp.add_entry(
+            dest_group,
             x['name'], username, password,
             url=url, notes=x['notes']
         )
@@ -112,12 +116,14 @@ def convert(output):
     kp.save()
 
 ##
-## Main
+# Main
 ##
+
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("-o", "--Output", required = True, help = "Output kdbx file path")
+parser.add_argument("-o", "--Output", required=True,
+                    help="Output kdbx file path")
 
 args = parser.parse_args()
 convert(args.Output)
