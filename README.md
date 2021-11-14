@@ -25,6 +25,11 @@ Install the dependencies of the script using [pip](https://pypi.org/project/pip/
 pip install -r requirements.txt
 ```
 
+## Code Mirrors
+
+* GitHub: [github.com/k3karthic/bitwarden-to-keepass/](https://github.com/k3karthic/bitwarden-to-keepass/)
+* Codeberg: [codeberg.org/k3karthic/bitwarden-to-keepass/](https://codeberg.org/k3karthic/bitwarden-to-keepass/)
+
 ## Running
 
 Run the script using the following command,
@@ -34,4 +39,10 @@ python convert.py -o <path to output kdbx>
 
 You need to provide your BitWarden vault password only once at the start.
 
-![screenshot of run](https://github.com/k3karthic/bitwarden-to-keepass/raw/main/assets/screenshot.png)
+### Demo
+
+[![asciicast](https://asciinema.org/a/449042.svg)](https://asciinema.org/a/449042)
+
+### Screenshot
+
+![screenshot of run](assets/screenshot.png)
