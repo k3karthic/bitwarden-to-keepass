@@ -2,12 +2,6 @@
 
 [Python](https://www.python.org/) script to convert a [BitWarden](https://bitwarden.com/) Vault into a [KeePass](https://keepassxc.org/) Database.
 
-## Requirements
-
-Software required to run the script,
-* [Python 3](https://www.python.org/download/releases/3.0/)
-* [BitWarden CLI](https://bitwarden.com/help/article/cli/)
-
 ## Design
 
 The script invokes the BitWarden CLI using the Python [subprocess](https://docs.python.org/3/library/subprocess.html) module. It performs the following conversions on the configured BitWarden Vault,
@@ -18,17 +12,23 @@ The script invokes the BitWarden CLI using the Python [subprocess](https://docs.
 
 BitWarden supports many URIs for an entry while [PyKeePass](https://github.com/libkeepass/pykeepass#adding-entries) only supports a single URI. The script only copies the first URI into the KeePass database. 
 
+## Code Mirrors
+
+* GitHub: [github.com/k3karthic/bitwarden-to-keepass/](https://github.com/k3karthic/bitwarden-to-keepass/)
+* Codeberg: [codeberg.org/k3karthic/bitwarden-to-keepass/](https://codeberg.org/k3karthic/bitwarden-to-keepass/)
+
+## Requirements
+
+Software required to run the script,
+* [Python 3](https://www.python.org/download/releases/3.0/)
+* [BitWarden CLI](https://bitwarden.com/help/article/cli/)
+
 ## Building
 
 Install the dependencies of the script using [pip](https://pypi.org/project/pip/),
 ```
 pip install -r requirements.txt
 ```
-
-## Code Mirrors
-
-* GitHub: [github.com/k3karthic/bitwarden-to-keepass/](https://github.com/k3karthic/bitwarden-to-keepass/)
-* Codeberg: [codeberg.org/k3karthic/bitwarden-to-keepass/](https://codeberg.org/k3karthic/bitwarden-to-keepass/)
 
 ## Running
 
