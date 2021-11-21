@@ -27,14 +27,14 @@ Software required to run the script,
 
 Install the dependencies of the script using [pip](https://pypi.org/project/pip/),
 ```
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 ## Running
 
 Run the script using the following command,
 ```
-python convert.py -o <path to output kdbx>
+$ python convert.py -o <path to output kdbx>
 ```
 
 You need to provide your BitWarden vault password only once at the start.
