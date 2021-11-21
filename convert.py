@@ -9,6 +9,7 @@
 
 import argparse
 import getpass
+import os
 import subprocess
 import sys
 
@@ -79,7 +80,10 @@ def create_keepass_groups(kp, folders_list):
 
 
 def convert(output):
-    password = getpass.getpass('Master Password: ')
+    if 'BITWARDEN_PASS' in os.environ:
+        password = os.environ['BITWARDEN_PASS']
+    else:
+        password = getpass.getpass('Master Password: ')
     print('')
 
     kp = pykeepass.create_database(output, password=password)

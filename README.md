@@ -39,6 +39,13 @@ $ python convert.py -o <path to output kdbx>
 
 You need to provide your BitWarden vault password only once at the start.
 
+### Non-Interactive
+
+The BitWarden password can be set in the environment variable `BITWARDEN_PASS`. This allows the script to run without requiring user input.
+```
+$ BITWARDEN_PASS="<password>" python convert.py -o <path to output kdbx>
+```
+
 ### Demo
 
 [![asciicast](https://asciinema.org/a/449042.svg)](https://asciinema.org/a/449042)
