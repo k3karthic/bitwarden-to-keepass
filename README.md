@@ -46,6 +46,13 @@ The BitWarden password can be set in the environment variable `BITWARDEN_PASS`. 
 $ BITWARDEN_PASS="<password>" python convert.py -o <path to output kdbx>
 ```
 
+### Local File
+
+You can use a local copy of the BitWarden vault as an unencrypted json file. Instructions for exporting a vault can be found at [bitwarden.com/help/article/export-your-data/](https://bitwarden.com/help/article/export-your-data/).
+```
+$ python convert.py -i <path to vault json> -o <path to output kdbx>
+```
+
 ### Demo
 
 [![asciicast](https://asciinema.org/a/449042.svg)](https://asciinema.org/a/449042)

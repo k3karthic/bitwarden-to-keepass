@@ -8,6 +8,7 @@
 # import pdb
 
 import argparse
+import codecs
 import getpass
 import os
 import subprocess
@@ -21,38 +22,44 @@ import pykeepass
 ##
 
 
-def fetch_bitwarden_folders(password):
+def fetch_bitwarden_folders(vault, password):
     print("Fetching folders...")
 
-    r = subprocess.run(
-        ["bw", "list", "folders"],
-        input=password.encode('utf-8'),
-        stderr=sys.stderr,
-        stdout=subprocess.PIPE
-    )
+    if vault is not None:
+        return vault['folders']
+    else:
+        r = subprocess.run(
+            ["bw", "list", "folders"],
+            input=password.encode('utf-8'),
+            stderr=sys.stderr,
+            stdout=subprocess.PIPE
+        )
 
-    try:
-        folders = json.loads(r.stdout)
-        return folders
-    except json.decoder.JSONDecodeError:
-        sys.exit(-1)
+        try:
+            folders = json.loads(r.stdout)
+            return folders
+        except json.decoder.JSONDecodeError:
+            sys.exit(-1)
 
 
-def fetch_bitwarden_items(password):
+def fetch_bitwarden_items(vault, password):
     print("Fetching items...")
 
-    r = subprocess.run(
-        ["bw", "list", "items"],
-        input=password.encode('utf-8'),
-        stderr=sys.stderr,
-        stdout=subprocess.PIPE
-    )
+    if vault is not None:
+        return vault['items']
+    else:
+        r = subprocess.run(
+            ["bw", "list", "items"],
+            input=password.encode('utf-8'),
+            stderr=sys.stderr,
+            stdout=subprocess.PIPE
+        )
 
-    try:
-        items = json.loads(r.stdout)
-        return items
-    except json.decoder.JSONDecodeError:
-        sys.exit(-1)
+        try:
+            items = json.loads(r.stdout)
+            return items
+        except json.decoder.JSONDecodeError:
+            sys.exit(-1)
 
 
 def create_keepass_groups(kp, folders_list):
@@ -79,7 +86,7 @@ def create_keepass_groups(kp, folders_list):
     return groups_dict
 
 
-def convert(output):
+def convert(input_file, output):
     if 'BITWARDEN_PASS' in os.environ:
         password = os.environ['BITWARDEN_PASS']
     else:
@@ -88,10 +95,21 @@ def convert(output):
 
     kp = pykeepass.create_database(output, password=password)
 
-    folders_list = fetch_bitwarden_folders(password)
+    vault = None
+    if input_file is not None:
+        input_str = ""
+        with codecs.open(input_file, 'r', 'utf-8') as f:
+            input_str = f.read()
+
+        try:
+            vault = json.loads(input_str)
+        except json.decoder.JSONDecodeError:
+            sys.exit(-1)
+
+    folders_list = fetch_bitwarden_folders(vault, password)
     groups = create_keepass_groups(kp, folders_list)
 
-    items_list = fetch_bitwarden_items(password)
+    items_list = fetch_bitwarden_items(vault, password)
     print('')
 
     for x in items_list:
@@ -126,8 +144,11 @@ def convert(output):
 
 parser = argparse.ArgumentParser()
 
+parser.add_argument("-i", "--Input", required=False,
+                    help="BitWarden unencrypted JSON file")
+
 parser.add_argument("-o", "--Output", required=True,
                     help="Output kdbx file path")
 
 args = parser.parse_args()
-convert(args.Output)
+convert(args.Input, args.Output)
