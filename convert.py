@@ -103,6 +103,9 @@ def convert(input_file, output):
 
         try:
             vault = json.loads(input_str)
+            if vault['encrypted'] is True:
+                print("Unsupported: exported json file is encrypted")
+                sys.exit(-1)
         except json.decoder.JSONDecodeError:
             sys.exit(-1)
 
