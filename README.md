@@ -48,7 +48,7 @@ $ BITWARDEN_PASS="<password>" python convert.py -o <path to output kdbx>
 
 ### Local File
 
-You can use a local copy of the BitWarden vault as an unencrypted json file. Instructions for exporting a vault can be found at [bitwarden.com/help/article/export-your-data/](https://bitwarden.com/help/article/export-your-data/).
+You can use a local copy of the BitWarden vault as an unencrypted json file. Instructions for exporting a vault are at [bitwarden.com/help/article/export-your-data/](https://bitwarden.com/help/article/export-your-data/).
 ```
 $ python convert.py -i <path to vault json> -o <path to output kdbx>
 ```
