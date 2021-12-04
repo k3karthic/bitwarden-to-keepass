@@ -1,4 +1,4 @@
-# Convert BitWarden Vault to a KeePass Database (kdbx)
+# Convert BitWarden Vault to KeePass Database (kdbx)
 
 [Python](https://www.python.org/) script to convert a [BitWarden](https://bitwarden.com/) Vault into a [KeePass](https://keepassxc.org/) Database.
 
@@ -25,7 +25,7 @@ BitWarden supports many URLs for an entry while [PyKeePass](https://github.com/l
 
 Software required to run the script,
 * [Python 3](https://www.python.org/download/releases/3.0/)
-* [BitWarden CLI](https://bitwarden.com/help/article/cli/) - Not used for local file input
+* [BitWarden CLI](https://bitwarden.com/help/article/cli/) — Not used for local file input
 
 ## Building
 
