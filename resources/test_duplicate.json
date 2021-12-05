@@ -95,7 +95,7 @@
       "folderId": "785d1f52-673b-4571-933e-9b72ed0c8e12",
       "type": 1,
       "reprompt": 0,
-      "name": "pass2",
+      "name": "pass1",
       "notes": null,
       "favorite": false,
       "login": {
@@ -109,7 +109,7 @@
             "uri": "https://127.0.0.1"
           }
         ],
-        "username": "admin2",
+        "username": "admin",
         "password": "123458",
         "totp": null
       },
