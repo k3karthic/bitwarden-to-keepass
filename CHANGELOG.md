@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2021-12-05
+### Added
+- Resolve duplicate entries by adding a suffix to the title.
+
 ## [0.1.2] - 2021-11-28
 ### Added
 - Support for using a local json export of bitwarden vault.
