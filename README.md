@@ -47,6 +47,8 @@ You need to provide your password only once at the start.
 
 ![screenshot of run](assets/screenshot.png)
 
+[![asciicast](https://asciinema.org/a/449042.svg)](https://asciinema.org/a/449042)
+
 ### Non-Interactive
 
 The BitWarden password can be set in the environment variable `BITWARDEN_PASS`. This allows the script to run without requiring user input.
@@ -61,6 +63,9 @@ You can use a local json export (unencrypted) of the BitWarden vault. Instructio
 $ python convert.py -i <path to vault json> -o <path to output kdbx>
 ```
 
-## Demo
+## Testing
 
-[![asciicast](https://asciinema.org/a/449042.svg)](https://asciinema.org/a/449042)
+Run unit tests using the following command,
+```
+$ python -m unittest
+```
