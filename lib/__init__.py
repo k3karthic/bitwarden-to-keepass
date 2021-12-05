@@ -12,9 +12,10 @@ import getpass
 import os
 import subprocess
 import sys
-
 import json
 import pykeepass
+
+from collections import Counter
 
 ##
 # Functions
@@ -114,10 +115,13 @@ def convert(input_file, output):
     items_list = fetch_bitwarden_items(vault, password)
     print('')
 
+    seen_entries = Counter({})
     for x in items_list:
+        group_id = 'root'
         dest_group = kp.root_group
         if x['folderId'] in groups:
-            dest_group = groups[x['folderId']]
+            group_id = x['folderId']
+            dest_group = groups[group_id]
 
         url = None
         if 'uris' in x['login'] and len(x['login']['uris']) > 0:
@@ -131,9 +135,17 @@ def convert(input_file, output):
         if password is None:
             password = ''
 
+        title = x['name']
+
+        seen_key = ''.join((group_id, title, username))
+        seen_entries[seen_key] += 1
+
+        if seen_entries[seen_key] > 1:
+            title = ''.join((title, ' (', str(seen_entries[seen_key] - 1), ')'))
+
         kp.add_entry(
             dest_group,
-            x['name'], username, password,
+            title, username, password,
             url=url, notes=x['notes']
         )
 

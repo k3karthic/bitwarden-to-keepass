@@ -95,7 +95,25 @@ class DuplicateTest(unittest.TestCase):
     def test_convert(self):
         input_file = os.path.join(os.path.dirname(__file__), '..', 'resources', 'test_duplicate.json')
 
-        self.assertRaisesRegex(Exception, "already exists", lib.convert, input_file, self.output)
+        lib.convert(input_file, self.output)
+
+        ## Load KeePass
+        kp = pykeepass.PyKeePass(self.output, password=__MASTER_PASS__)
+
+        ## Validate folder2 group
+        folder2 = kp.find_groups(name='folder2', first=True)
+        self.assertIsNotNone(folder2)
+        self.assertEqual(len(folder2.entries), 2)
+
+        pass1 = kp.find_entries(title='pass1', first=True, group=folder2)
+        self.assertIsNotNone(pass1)
+
+        pass1_ = kp.find_entries(title='pass1 (1)', first=True, group=folder2)
+        self.assertIsNotNone(pass1_)
+
+        self.assertEqual(pass1_.username, 'admin')
+        self.assertEqual(pass1_.password, '123458')
+        self.assertEqual(pass1_.url, 'https://localhost3')
 
     def tearDown(self):
         if os.path.exists(self.output):

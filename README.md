@@ -16,6 +16,8 @@ Performs the following conversions on the BitWarden Vault,
 
 BitWarden supports many URLs for an entry while [PyKeePass](https://github.com/libkeepass/pykeepass#adding-entries) only supports a single URL. The script only copies the first URL into the KeePass database. 
 
+BitWarden supports multiple entries with the same title and username while [PyKeePass](https://github.com/libkeepass/pykeepass/blob/master/pykeepass/pykeepass.py#L612) does not. The script modifies the title with a suffix (e.g, 'name (1)', 'name (2)') in case of a collission.
+
 ## Code Mirrors
 
 * GitHub: [github.com/k3karthic/bitwarden-to-keepass](https://github.com/k3karthic/bitwarden-to-keepass/)
