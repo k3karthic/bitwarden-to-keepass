@@ -16,7 +16,7 @@ Performs the following conversions on the BitWarden Vault,
 
 BitWarden supports many URLs for an entry while [PyKeePass](https://github.com/libkeepass/pykeepass#adding-entries) only supports a single URL. The script only copies the first URL into the KeePass database. 
 
-[PyKeePass](https://github.com/libkeepass/pykeepass/blob/master/pykeepass/pykeepass.py#L612) requires entries to have a unique title and username combination. The script adds a suffix to the title (e.g, 'name (1)', 'name (2)') in case of a collission.
+[PyKeePass](https://github.com/libkeepass/pykeepass/blob/master/pykeepass/pykeepass.py#L612) requires entries to have a unique title and username combination. The script adds a suffix to the title (e.g, 'name (1)', 'name (2)') in case of a collision.
 
 ## Code Mirrors
 
