@@ -1,22 +1,26 @@
 # Convert BitWarden Vault to KeePass Database (kdbx)
 
-[Python](https://www.python.org/) script to convert a [BitWarden](https://bitwarden.com/) Vault into a [KeePass](https://keepassxc.org/) Database (kdbx).
+Python script to convert a [BitWarden][1] Vault into a [KeePass][2] Database
+(kdbx).
 
 ## Design
 
-The script reads a BitWarden vault using either of the following methods,
-* Invoke the [BitWarden CLI](https://bitwarden.com/help/article/cli/) using the Python [subprocess](https://docs.python.org/3/library/subprocess.html) module
-* Parse a local json export (unencrypted) of the vault
+The script reads a BitWarden vault (either remote or a local unencrypted
+Bitwarden JSON file).
 
-Performs the following conversions on the BitWarden Vault,
-* [BitWarden folders](https://bitwarden.com/help/article/folders/) into [KeePass groups](https://keepassxc.org/docs/KeePassXC_UserGuide.html#_application_layout)
-* [BitWarden items](https://bitwarden.com/help/article/managing-items/) into [KeePass entries](https://keepassxc.org/docs/KeePassXC_UserGuide.html#_adding_an_entry)
+Folder structure is imported as well as all four [Bitwarden item types][4].
 
 ### Drawbacks
 
-BitWarden supports many URLs for an entry while [PyKeePass](https://github.com/libkeepass/pykeepass#adding-entries) only supports a single URL. The script only copies the first URL into the KeePass database. The rest are copied into the 'notes' field. Likewise, for any Bitwarden 'card' or 'identity' type entries, the fields (with labels) will be imported into the 'notes' field.
+BitWarden supports many URLs for an entry while [PyKeePass][5] only supports a
+single URL. The script only copies the first URL into the KeePass database. The
+rest are copied into the `notes` field. likewise, for any bitwarden `card` or
+`identity` type entries, the fields (with labels) will be imported into the
+`notes` field.
 
-[PyKeePass](https://github.com/libkeepass/pykeepass/blob/master/pykeepass/pykeepass.py#L612) requires entries to have a unique title and username combination. The script adds a suffix to the title (e.g, 'name (1)', 'name (2)') in case of a collision.
+Pykeepass [requires entries to have a unique title and username combination][6].
+The script adds a suffix to the title (e.g, `name (1)`, `name (2)`) in case of a
+collision.
 
 ## Code Mirrors
 
@@ -26,24 +30,28 @@ BitWarden supports many URLs for an entry while [PyKeePass](https://github.com/l
 ## Requirements
 
 Software required to run the script,
-* [Python 3](https://www.python.org/download/releases/3.0/)
-* [BitWarden CLI](https://bitwarden.com/help/article/cli/) — Not used for local file input
+* Python 3
+* [BitWarden CLI][3] — Not used for local file input
 
 ## Building
 
-Install the Python dependencies of the script using [pip](https://pypi.org/project/pip/),
-```
-$ pip install -r requirements.txt
-```
+Install the Python dependencies of the script using pip:
 
-## Running
+    $ pip install -r requirements.txt
 
-Run the script using the following command,
-```
-$ python convert.py -o <path to output kdbx>
-```
 
-You need to provide your password only once at the start.
+## Usage
+
+    convert.py [-h] [-i INPUT FILE] [-n] -o OUTPUT FILE
+
+### Options
+
+* `-i --input` input filename (unencrypted JSON) (optional)
+* `-o --output` output kdbx filename
+* `-n --no-confirm` don't ask before replacing output file if it exists
+
+You need to provide your password only once at the start. The password for the
+Keepass database will be the same as your Bitwarden password.
 
 ![screenshot of run](assets/screenshot.png)
 
@@ -51,21 +59,30 @@ You need to provide your password only once at the start.
 
 ### Non-Interactive
 
-The BitWarden password can be set in the environment variable `BITWARDEN_PASS`. This allows the script to run without requiring user input.
-```
-$ BITWARDEN_PASS="<password>" python convert.py -o <path to output kdbx>
-```
+The BitWarden password can be set in the environment variable `BITWARDEN_PASS`.
+This allows the script to run without requiring user input (assuming 2FA is not
+enabled on the accout).
+
+    $ BITWARDEN_PASS="<password>" python convert.py -o <path to output kdbx>
 
 ### Local File
 
-You can use a local json export (unencrypted) of the BitWarden vault. Instructions for exporting a vault are at [bitwarden.com/help/article/export-your-data](https://bitwarden.com/help/article/export-your-data/).
-```
-$ python convert.py -i <path to vault json> -o <path to output kdbx>
-```
+You can use a local json export (unencrypted) of the BitWarden vault.
+[Instructions for exporting a vault][7].
+
+    $ python convert.py -i <path to vault json> -o <path to output kdbx>
+
 
 ## Testing
 
 Run unit tests using the following command,
-```
-$ python -m unittest
-```
+
+    $ python -m unittest
+
+[1]: https://bitwarden.com/ "Bitwarden.com"
+[2]: https://keepass.info/ "Keepass"
+[3]: https://bitwarden.com/help/article/cli/ "Bitwarden CLI"
+[4]: https://bitwarden.com/help/article/cli/#enums "Bitwarden Item Types"
+[5]: https://github.com/libkeepass/pykeepass#adding-entries "Pykeepass Adding Entries"
+[6]: https://github.com/libkeepass/pykeepass/blob/master/pykeepass/pykeepass.py#l612 "Pykeepass Unique Entries"
+[7]: https://bitwarden.com/help/article/export-your-data/ "Bitwarden Export"
