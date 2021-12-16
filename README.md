@@ -48,7 +48,7 @@ Install the Python dependencies of the script using pip:
 
 * `-i --input` input filename (unencrypted JSON) (optional)
 * `-o --output` output kdbx filename
-* `-n --no-confirm` don't ask before replacing output file if it exists
+* `-r --replace` don't ask before replacing output file if it exists
 
 You need to provide your password only once at the start. The password for the
 Keepass database will be the same as your Bitwarden password.
