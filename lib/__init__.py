@@ -137,7 +137,7 @@ def convert(input_file, output):
 
         title = x['name']
 
-        seen_key = ''.join((group_id, title, username))
+        seen_key = ''.join((group_id or "", title, username if username is not None else ""))
         seen_entries[seen_key] += 1
 
         if seen_entries[seen_key] > 1:
