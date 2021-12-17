@@ -31,7 +31,7 @@ collision.
 
 Software required to run the script,
 * Python 3.7+
-* [BitWarden CLI][3] — Not used for local file input
+* [BitWarden CLI][3]
 
 ## Building
 
@@ -42,13 +42,13 @@ Install the Python dependencies of the script using pip:
 
 ## Usage
 
-    convert.py [-h] [-i INPUT FILE] [-n] -o OUTPUT FILE
+    convert.py [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
 
 ### Options
 
 * `-i --input` input filename (unencrypted JSON) (optional)
 * `-o --output` output kdbx filename
-* `-n --no-confirm` don't ask before replacing output file if it exists
+* `-r --replace` don't ask before replacing output file if it exists
 
 You need to provide your password only once at the start. The password for the
 Keepass database will be the same as your Bitwarden password.
