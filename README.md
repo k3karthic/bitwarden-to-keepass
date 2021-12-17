@@ -31,7 +31,7 @@ collision.
 
 Software required to run the script,
 * Python 3.7+
-* [BitWarden CLI][3] — Not used for local file input
+* [BitWarden CLI][3]
 
 ## Building
 
