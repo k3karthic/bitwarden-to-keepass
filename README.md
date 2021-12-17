@@ -42,7 +42,7 @@ Install the Python dependencies of the script using pip:
 
 ## Usage
 
-    convert.py [-h] [-i INPUT FILE] [-n] -o OUTPUT FILE
+    convert.py [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
 
 ### Options
 
