@@ -28,11 +28,15 @@ class BitWarden:
         self.vault = vault
         self.password = password
 
+        self.folders = None
+        self.items = None
+
     def fetch_bitwarden_folders(self):
         """List folders from bw cli or provided vault"""
 
         if self.vault is not None:
-            return self.vault["folders"]
+            self.folders = self.vault["folders"]
+            return self.folders
 
         run_out = subprocess.run(
             ["bw", "list", "folders"],
@@ -42,8 +46,8 @@ class BitWarden:
         )
 
         try:
-            folders = json.loads(run_out.stdout)
-            return folders
+            self.folders = json.loads(run_out.stdout)
+            return self.folders
         except json.decoder.JSONDecodeError:
             sys.exit(-1)
 
@@ -51,7 +55,8 @@ class BitWarden:
         """List items from bw cli or provided vault"""
 
         if self.vault is not None:
-            return self.vault["items"]
+            self.items = self.vault["items"]
+            return self.items
 
         run_out = subprocess.run(
             ["bw", "list", "items"],
@@ -61,10 +66,20 @@ class BitWarden:
         )
 
         try:
-            items = json.loads(run_out.stdout)
-            return items
+            self.items = json.loads(run_out.stdout)
+            return self.items
         except json.decoder.JSONDecodeError:
             sys.exit(-1)
+
+    def export_json(self, output):
+        """Export JSON vault"""
+
+        with open(os.path.expanduser(output), "w", encoding="utf-8") as f_handle:
+            f_handle.write(json.dumps({
+                "encrypted": False,
+                "folders": self.folders,
+                "items": self.items
+            }))
 
 
 class KeePassConvert:
@@ -208,7 +223,7 @@ class KeePassConvert:
 
 
 ##
-## Functions
+# Functions
 ##
 
 
@@ -233,7 +248,7 @@ def parse_input_json(filename):
         return vault
 
 
-def convert(input_file, output):
+def convert(input_file, output, export_json):
     """Main entrypoint for the script"""
 
     if "BITWARDEN_PASS" in os.environ:
@@ -256,6 +271,9 @@ def convert(input_file, output):
 
     kp_db.save()
 
+    if len(export_json) > 0:
+        bw_vault.export_json(export_json)
+
 
 ##
 # Main
@@ -270,6 +288,15 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("-o", "--output", required=True, help="Output kdbx file path")
+
+    parser.add_argument(
+        "-j",
+        "--json",
+        required=False,
+        type=str,
+        default='',
+        help="Export BitWarden vault as a JSON file",
+    )
 
     parser.add_argument(
         "-r",
@@ -287,4 +314,4 @@ if __name__ == "__main__":
         if res not in ["Y", "y"]:
             sys.exit()
 
-    convert(args.input, args.output)
+    convert(args.input, args.output, args.json)

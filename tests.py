@@ -6,6 +6,7 @@
 # Imports
 ##
 
+import json
 import os
 import tempfile
 import unittest
@@ -86,7 +87,7 @@ class InteractiveTest(unittest.TestCase):
         input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
         getpass_func.return_value = __MASTER_PASS__
 
-        convert.convert(input_file, self.output)
+        convert.convert(input_file, self.output, '')
 
         validate_keepass(self)
 
@@ -109,7 +110,7 @@ class NonInteractiveTest(unittest.TestCase):
 
         input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
 
-        convert.convert(input_file, self.output)
+        convert.convert(input_file, self.output, '')
 
         validate_keepass(self)
 
@@ -134,7 +135,7 @@ class DuplicateTest(unittest.TestCase):
             os.path.dirname(__file__), "resources", "test_duplicate.json"
         )
 
-        convert.convert(input_file, self.output)
+        convert.convert(input_file, self.output, '')
 
         # Load KeePass
         kpo = pykeepass.PyKeePass(self.output, password=__MASTER_PASS__)
@@ -153,6 +154,41 @@ class DuplicateTest(unittest.TestCase):
         self.assertEqual(pass1_.username, "admin")
         self.assertEqual(pass1_.password, "123458")
         self.assertEqual(pass1_.url, "https://localhost3")
+
+    def tearDown(self):
+        if os.path.exists(self.output):
+            os.unlink(self.output)
+
+
+class ExportTest(unittest.TestCase):
+    """Test if convert.py can handle password submitted from stdin"""
+
+    def setUp(self):
+        os.environ["BITWARDEN_PASS"] = __MASTER_PASS__
+
+        _, output = tempfile.mkstemp()
+        self.output = output
+
+    def test_convert(self):
+        """Entrypoint for test case"""
+
+        input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
+        _, json_output = tempfile.mkstemp()
+
+        convert.convert(input_file, self.output, json_output)
+
+        self.assertTrue(os.path.exists(json_output))
+        with open(os.path.expanduser(json_output), "r", encoding="utf-8") as f_handle:
+            try:
+                obj = json.loads(f_handle.read())
+
+                self.assertFalse(obj["encrypted"])
+                self.assertEqual(len(obj["folders"]), 2)
+                self.assertEqual(len(obj["items"]), 4)
+            except json.decoder.JSONDecodeError as err:
+                self.fail(err)
+
+        validate_keepass(self)
 
     def tearDown(self):
         if os.path.exists(self.output):
