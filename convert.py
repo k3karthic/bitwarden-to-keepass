@@ -1,221 +1,289 @@
 #!/usr/bin/env python3
-"""Export Bitwarden vault to Keepass database
-
-"""
+"""Export BitWarden vault to a KeePass database"""
 # -*- coding: utf-8 -*-
+
+##
+# Imports
+##
+
 import argparse
-from collections import Counter
 import getpass
+import json
 import os
 import subprocess
 import sys
-import json
+from collections import Counter
+
 import pykeepass
 
-
-def fetch_bitwarden_folders(vault, password):
-    """Get folders
-
-    """
-    print("Fetching folders...")
-
-    if vault is not None:
-        return vault['folders']
-    res = subprocess.run(["bw", "list", "folders"],
-                         input=password.encode('utf-8'),
-                         capture_output=True,
-                         check=False)
-    try:
-        folders = json.loads(res.stdout)
-        return folders
-    except json.decoder.JSONDecodeError:
-        sys.exit(-1)
+##
+# Classes
+##
 
 
-def fetch_bitwarden_items(vault, password):
-    """Get all vault items
+class BitWarden:
+    """Interact with the BitWarden CLI"""
 
-    """
-    print("Fetching items...")
+    def __init__(self, vault, password):
+        self.vault = vault
+        self.password = password
 
-    if vault is not None:
-        return vault['items']
-    res = subprocess.run(["bw", "list", "items"],
-                         input=password.encode('utf-8'),
-                         capture_output=True,
-                         check=False)
-    try:
-        items = json.loads(res.stdout)
-        return items
-    except json.decoder.JSONDecodeError:
-        sys.exit(-1)
+    def fetch_bitwarden_folders(self):
+        """List folders from bw cli"""
 
+        if self.vault is not None:
+            return self.vault["folders"]
 
-def create_keepass_groups(kpo, folders_list):
-    """Create keepass folder structure based on Bitwarden folders
+        print("Fetching folders...")
 
-    """
-    groups_dict = {}
+        run_out = subprocess.run(
+            ["bw", "list", "folders"],
+            input=self.password.encode("utf-8"),
+            capture_output=True,
+            check=False,
+        )
 
-    for folder in folders_list:
-        names = folder['name'].split('/')
+        try:
+            folders = json.loads(run_out.stdout)
+            return folders
+        except json.decoder.JSONDecodeError:
+            sys.exit(-1)
 
-        group = None
-        parent = kpo.root_group
-        for name in names:
-            if name == 'No Folder':
-                group = kpo.root_group
-                break
+    def fetch_bitwarden_items(self):
+        """List items from bw cli"""
 
-            if name not in groups_dict:
-                group = kpo.add_group(parent, name)
-                groups_dict[name] = group
+        if self.vault is not None:
+            return self.vault["items"]
 
-            parent = groups_dict[name]
+        print("Fetching items...")
 
-        groups_dict[folder['id']] = group
+        run_out = subprocess.run(
+            ["bw", "list", "items"],
+            input=self.password.encode("utf-8"),
+            capture_output=True,
+            check=False,
+        )
 
-    return groups_dict
-
-
-def _login(item):
-    """Handle login entries
-
-        Returns: title, username, password, url, notes (include any extra URLs)
-
-    """
-    title = item['name']
-    notes = item.get('notes', '') or ''
-    url = None
-
-    if len(item['login'].get('uris', [])) > 0:
-        urls = [i['uri'] or '' for i in item['login']['uris']]
-        url = urls[0]
-        if len(urls) > 1:
-            notes = "{}\n{}".format(notes, "\n".join(urls[1:]))
-
-    username = item['login'].get('username', '') or ''
-    password = item['login'].get('password', '') or ''
-
-    return title, username, password, url, notes
+        try:
+            items = json.loads(run_out.stdout)
+            return items
+        except json.decoder.JSONDecodeError:
+            sys.exit(-1)
 
 
-def _card(item):
-    """Handle card entries
+class KeePassConvert:
+    """Convert BitWarden items to KeePass entries"""
 
-        Returns: title (append " - Card" to the name,
-                 username (Card brand),
-                 password (card number),
-                 url (none),
-                 notes (including all card info)
+    def __init__(self, output, password):
+        self.kp_db = pykeepass.create_database(output, password=password)
+        self.groups = None
 
-    """
-    notes = item.get('notes', "") or ""
-    # Add card info to the notes
-    notes = notes + ("\n".join([f"{i}: {j}" for i, j in item.get('card', "").items()]))
-    return f"{item['name']} - Card", \
-           item.get('card', {}).get('brand', '') or "", \
-           item.get('card', {}).get('number', "") or "", \
-           "", \
-           notes
+    @staticmethod
+    def __convert_login(item):
+        title = item["name"]
+        notes = item.get("notes", "") or ""
+        url = None
+
+        if len(item["login"].get("uris", [])) > 0:
+            urls = [i["uri"] or "" for i in item["login"]["uris"]]
+            url = urls[0]
+
+            if len(urls) > 1:
+                notes = "{}\n{}".format(notes, "\n".join(urls[1:]))
+
+        username = item["login"].get("username", "") or ""
+        password = item["login"].get("password", "") or ""
+
+        return title, username, password, url, notes
+
+    @staticmethod
+    def __convert_note(item):
+        return f"{item['name']} - Secure Note", "", "", "", item.get("notes", "") or ""
+
+    @staticmethod
+    def __convert_card(item):
+        notes = item.get("notes", "") or ""
+
+        # Add card info to the notes
+        notes = notes + (
+            "\n".join([f"{i}: {j}" for i, j in item.get("card", "").items()])
+        )
+
+        return (
+            f"{item['name']} - Card",
+            item.get("card", {}).get("brand", "") or "",
+            item.get("card", {}).get("number", "") or "",
+            "",
+            notes,
+        )
+
+    @staticmethod
+    def __convert_identity(item):
+        notes = item.get("notes", "") or ""
+
+        # Add identity info to the notes
+        notes = notes + (
+            "\n".join([f"{i}: {j}" for i, j in item.get("identity", "").items()])
+        )
+
+        return f"{item['name']} - Identity", "", "", "", notes
+
+    @classmethod
+    def __item_to_entry(cls, item):
+        """Call the appropriate helper function based on the item type"""
+
+        item_type = item["type"]
+
+        if item_type == 1:
+            return cls.__convert_login(item)
+
+        if item_type == 2:
+            return cls.__convert_note(item)
+
+        if item_type == 3:
+            return cls.__convert_card(item)
+
+        if item_type == 4:
+            return cls.__convert_identity(item)
+
+        raise Exception(f"Unknown item type: {item_type}")
+
+    def folders_to_groups(self, folders_list):
+        """Create KeePass folder structure based on BitWarden folders"""
+
+        groups_dict = {}
+
+        for folder in folders_list:
+            names = folder["name"].split("/")
+
+            group = None
+            parent = self.kp_db.root_group
+            for name in names:
+                if name == "No Folder":
+                    group = self.kp_db.root_group
+                    break
+
+                if name not in groups_dict:
+                    group = self.kp_db.add_group(parent, name)
+                    groups_dict[name] = group
+
+                parent = groups_dict[name]
+
+            groups_dict[folder["id"]] = group
+
+        self.groups = groups_dict
+
+    def items_to_entries(self, items_list):
+        """Convert BitWarden item to KeePass entry"""
+
+        if self.groups is None:
+            raise Exception("Run folders_to_groups before running items_to_entries")
+
+        seen_entries = Counter({})
+
+        for item in items_list:
+            group_id = "root"
+            dest_group = self.kp_db.root_group
+            if item["folderId"] in self.groups:
+                group_id = item["folderId"]
+                dest_group = self.groups[group_id]
+
+            title, username, password, url, notes = self.__item_to_entry(item)
+
+            seen_key = "".join(
+                (group_id or "", title, username if username is not None else "")
+            )
+            seen_entries[seen_key] += 1
+
+            if seen_entries[seen_key] > 1:
+                title = "".join((title, " (", str(seen_entries[seen_key] - 1), ")"))
+
+            self.kp_db.add_entry(
+                dest_group, title, username, password, url=url, notes=notes
+            )
+
+    def save(self):
+        """Save the KeePass database"""
+
+        self.kp_db.save()
 
 
-def _identity(item):
-    """Handle identity entries
-
-        Returns: title, username, password, url, notes
-
-    """
-    notes = item.get('notes', "") or ""
-    # Add identity info to the notes
-    notes = notes + ("\n".join([f"{i}: {j}" for i, j in item.get('identity', "").items()]))
-    return f"{item['name']} - Identity", "", "", "", notes
+##
+## Functions
+##
 
 
-def _note(item):
-    """Handle secure note entries
+def parse_input_json(filename):
+    """Parse input json file if provided"""
 
-        Returns: title, username, password, url, notes
-
-    """
-    return f"{item['name']} - Secure Note", "", "", "", item.get('notes', '') or ""
-
-
-def _input_file(filename):
-    """Open input file if given
-
-        Args: filename - string
-        Returns: vault - dict
-
-    """
     if not filename:
         return None
-    with open(os.path.expanduser(filename), 'r', encoding='utf-8') as fname:
+
+    with open(os.path.expanduser(filename), "r", encoding="utf-8") as fname:
         input_str = fname.read()
-    try:
-        vault = json.loads(input_str)
-        if vault['encrypted'] is True:
-            print("Unsupported: exported json file is encrypted")
+
+        try:
+            vault = json.loads(input_str)
+            if vault["encrypted"] is True:
+                print("Unsupported: exported json file is encrypted")
+                sys.exit(-1)
+        except json.decoder.JSONDecodeError as err:
+            print(err)
             sys.exit(-1)
-    except json.decoder.JSONDecodeError as err:
-        print(err)
-        sys.exit(-1)
-    return vault
+
+        return vault
 
 
-def convert(input_file, output):  # pylint: disable=too-many-locals
-    """Main entrypoint for script
+def convert(input_file, output):
+    """Main entrypoint for the script"""
 
-    """
-    if 'BITWARDEN_PASS' in os.environ:
-        password = os.environ['BITWARDEN_PASS']
+    if "BITWARDEN_PASS" in os.environ:
+        password = os.environ["BITWARDEN_PASS"]
     else:
-        password = getpass.getpass('Master Password: ')
-    print('')
+        password = getpass.getpass("Master Password: ")
 
-    kpo = pykeepass.create_database(output, password=password)
+    print("")
 
-    vault = _input_file(input_file) or None
-    folders_list = fetch_bitwarden_folders(vault, password)
-    groups = create_keepass_groups(kpo, folders_list)
+    kp_db = KeePassConvert(output, password)
+    bw_vault = BitWarden(parse_input_json(input_file) or None, password)
 
-    items_list = fetch_bitwarden_items(vault, password)
-    print('')
+    kp_db.folders_to_groups(bw_vault.fetch_bitwarden_folders())
 
-    seen_entries = Counter({})
-    types = {1: _login, 2: _note, 3: _card, 4: _identity}
-    for item in items_list:
-        group_id = 'root'
-        dest_group = kpo.root_group
-        if item['folderId'] in groups:
-            group_id = item['folderId']
-            dest_group = groups[group_id]
+    kp_db.items_to_entries(bw_vault.fetch_bitwarden_items())
 
-        title, username, password, url, notes = types[item['type']](item)
+    print("")
 
-        seen_key = ''.join((group_id or "", title, username if username is not None else ""))
-        seen_entries[seen_key] += 1
-
-        if seen_entries[seen_key] > 1:
-            title = ''.join((title, ' (', str(seen_entries[seen_key] - 1), ')'))
-
-        kpo.add_entry(dest_group,
-                      title, username, password,
-                      url=url, notes=notes)
-    kpo.save()
+    kp_db.save()
 
 
-if __name__ == '__main__':
+##
+# Main
+##
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", required=False,
-                        help="BitWarden unencrypted JSON file")
-    parser.add_argument("-o", "--output", required=True,
-                        help="Output kdbx file path")
-    parser.add_argument("-r", "--replace", required=False, type=bool, default=False,
-                        help="Ignore replace file warning")
+
+    parser.add_argument(
+        "-i", "--input", required=False, help="BitWarden unencrypted JSON file"
+    )
+
+    parser.add_argument("-o", "--output", required=True, help="Output kdbx file path")
+
+    parser.add_argument(
+        "-r",
+        "--replace",
+        required=False,
+        type=bool,
+        default=False,
+        help="Ignore replace file warning",
+    )
+
     args = parser.parse_args()
+
     if args.replace is False and os.path.exists(os.path.expanduser(args.output)):
         res = input(f"Output file {args.output} exists. Replace? (n/Y)")
         if res not in ["Y", "y"]:
             sys.exit()
+
     convert(args.input, args.output)
