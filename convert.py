@@ -272,6 +272,7 @@ def convert(params):
     bw_vault = BitWarden(parse_input_json(params["input"]) or None, password)
 
     if params["sync"] is True:
+        print("Syncing vault...")
         bw_vault.sync()
 
     print("Fetching folders...")
@@ -336,4 +337,4 @@ if __name__ == "__main__":
         if res not in ["Y", "y"]:
             sys.exit()
 
-    convert(dict(args.keyvalues))
+    convert(dict(args._get_kwargs()))
