@@ -22,19 +22,17 @@ import pykeepass
 
 
 class BitWarden:
-    """Interact with the BitWarden CLI"""
+    """Interact with the BitWarden CLI or JSON vault"""
 
     def __init__(self, vault, password):
         self.vault = vault
         self.password = password
 
     def fetch_bitwarden_folders(self):
-        """List folders from bw cli"""
+        """List folders from bw cli or provided vault"""
 
         if self.vault is not None:
             return self.vault["folders"]
-
-        print("Fetching folders...")
 
         run_out = subprocess.run(
             ["bw", "list", "folders"],
@@ -50,12 +48,10 @@ class BitWarden:
             sys.exit(-1)
 
     def fetch_bitwarden_items(self):
-        """List items from bw cli"""
+        """List items from bw cli or provided vault"""
 
         if self.vault is not None:
             return self.vault["items"]
-
-        print("Fetching items...")
 
         run_out = subprocess.run(
             ["bw", "list", "items"],
@@ -190,11 +186,14 @@ class KeePassConvert:
 
             title, username, password, url, notes = self.__item_to_entry(item)
 
+            # The combination of group_id, title & username must be unique
             seen_key = "".join(
                 (group_id or "", title, username if username is not None else "")
             )
             seen_entries[seen_key] += 1
 
+            # Add a suffix in the following format for duplicate entries
+            #   <title> (<count>) e.g., pass1 (2)
             if seen_entries[seen_key] > 1:
                 title = "".join((title, " (", str(seen_entries[seen_key] - 1), ")"))
 
@@ -247,8 +246,10 @@ def convert(input_file, output):
     kp_db = KeePassConvert(output, password)
     bw_vault = BitWarden(parse_input_json(input_file) or None, password)
 
+    print("Fetching folders...")
     kp_db.folders_to_groups(bw_vault.fetch_bitwarden_folders())
 
+    print("Fetching items...")
     kp_db.items_to_entries(bw_vault.fetch_bitwarden_items())
 
     print("")
