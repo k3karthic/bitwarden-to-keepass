@@ -31,6 +31,16 @@ class BitWarden:
         self.folders = None
         self.items = None
 
+    def sync(self):
+        """Sync BitWarden vault using cli"""
+
+        subprocess.run(
+            ["bw", "sync"],
+            input=self.password.encode("utf-8"),
+            capture_output=False,
+            check=False,
+        )
+
     def fetch_bitwarden_folders(self):
         """List folders from bw cli or provided vault"""
 
@@ -248,7 +258,7 @@ def parse_input_json(filename):
         return vault
 
 
-def convert(input_file, output, export_json):
+def convert(params):
     """Main entrypoint for the script"""
 
     if "BITWARDEN_PASS" in os.environ:
@@ -258,8 +268,11 @@ def convert(input_file, output, export_json):
 
     print("")
 
-    kp_db = KeePassConvert(output, password)
-    bw_vault = BitWarden(parse_input_json(input_file) or None, password)
+    kp_db = KeePassConvert(params["output"], password)
+    bw_vault = BitWarden(parse_input_json(params["input"]) or None, password)
+
+    if params["sync"] is True:
+        bw_vault.sync()
 
     print("Fetching folders...")
     kp_db.folders_to_groups(bw_vault.fetch_bitwarden_folders())
@@ -271,8 +284,8 @@ def convert(input_file, output, export_json):
 
     kp_db.save()
 
-    if len(export_json) > 0:
-        bw_vault.export_json(export_json)
+    if len(params["json"]) > 0:
+        bw_vault.export_json(params["json"])
 
 
 ##
@@ -290,6 +303,15 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", required=True, help="Output kdbx file path")
 
     parser.add_argument(
+        "-r",
+        "--replace",
+        required=False,
+        type=bool,
+        default=False,
+        help="Ignore replace file warning",
+    )
+
+    parser.add_argument(
         "-j",
         "--json",
         required=False,
@@ -299,12 +321,12 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-r",
-        "--replace",
+        "-s",
+        "--sync",
         required=False,
         type=bool,
         default=False,
-        help="Ignore replace file warning",
+        help="Sync BitWarden vault using cli",
     )
 
     args = parser.parse_args()
@@ -314,4 +336,4 @@ if __name__ == "__main__":
         if res not in ["Y", "y"]:
             sys.exit()
 
-    convert(args.input, args.output, args.json)
+    convert(dict(args.keyvalues))
