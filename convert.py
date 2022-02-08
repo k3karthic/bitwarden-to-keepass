@@ -164,7 +164,7 @@ def _input_file(filename):
 
 
 def convert(input_file, output):  # pylint: disable=too-many-locals
-    """Main entrypoint for script
+    """Conversion logic
 
     """
     if 'BITWARDEN_PASS' in os.environ:
@@ -205,7 +205,10 @@ def convert(input_file, output):  # pylint: disable=too-many-locals
     kpo.save()
 
 
-if __name__ == '__main__':
+def main():
+    """Main script entrypoint
+
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=False,
                         help="BitWarden unencrypted JSON file")
@@ -219,3 +222,7 @@ if __name__ == '__main__':
         if res not in ["Y", "y"]:
             sys.exit()
     convert(args.input, args.output)
+
+
+if __name__ == '__main__':
+    main()
