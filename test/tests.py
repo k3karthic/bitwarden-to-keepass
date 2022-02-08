@@ -56,7 +56,7 @@ class InteractiveTest(unittest.TestCase):
 
     @patch("getpass.getpass", create=True)
     def test_convert(self, getpass_func):
-        input_file = os.path.join(os.path.dirname(__file__), 'resources', 'test.json')
+        input_file = os.path.join('test', 'test.json')
         getpass_func.return_value = __MASTER_PASS__
 
         convert.convert(input_file, self.output)
@@ -75,7 +75,7 @@ class NonInteractiveTest(unittest.TestCase):
         self.output = output
 
     def test_convert(self):
-        input_file = os.path.join(os.path.dirname(__file__), 'resources', 'test.json')
+        input_file = os.path.join('test', 'test.json')
 
         convert.convert(input_file, self.output)
 
@@ -93,7 +93,7 @@ class DuplicateTest(unittest.TestCase):
         self.output = output
 
     def test_convert(self):
-        input_file = os.path.join(os.path.dirname(__file__), 'resources', 'test_duplicate.json')
+        input_file = os.path.join('test', 'test_duplicate.json')
 
         convert.convert(input_file, self.output)
 
@@ -120,5 +120,5 @@ class DuplicateTest(unittest.TestCase):
             os.unlink(self.output)
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
     unittest.main()
