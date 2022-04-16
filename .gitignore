@@ -1,6 +1,12 @@
-*.swp
-.venv
+*.egg-info/
 *.kdbx
+*.pyc
+*.swp
+*.un~
+.coverage
+.venv
 .vscode
 __pycache__
 .mypy_cache
+build/
+dist/

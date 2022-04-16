@@ -33,16 +33,40 @@ Software required to run the script,
 * Python 3.7+
 * [BitWarden CLI][3]
 
-## Building
+## Installation
 
-Install the Python dependencies of the script using pip:
+The script can be run as is, or installed using pip, venv and/or pipx. To avoid
+any conflicts with other applications named `convert.py`, the script is named
+`bw2kp` when installed via pip or setup.py.
+
+1. Install the script (including dependencies) to ~/.local/bin/bw2kp:
+   (RECOMMENDED)
+   
+    $ pip install --user .
+    $ bw2kp -o bitwarden.kdbx
+    
+OR
+
+2. Install the Python dependencies of the script using pip and run in place:
 
     $ pip install -r requirements.txt
+    $ ./convert.py -o bitwarden.kdbx
 
+OR
+
+3. Install into a venv:
+    
+    $ python -m venv .venv
+    $ source .venv/bin/activate
+    $ pip install .
+    $ deactivate
+    $ .venv/bin/bw2kp -o bitwarden.kdbx
 
 ## Usage
 
     convert.py [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
+    OR (if application is installed via pip)
+    bw2kp [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
 
 ### Options
 
@@ -63,14 +87,14 @@ The BitWarden password can be set in the environment variable `BITWARDEN_PASS`.
 This allows the script to run without requiring user input (assuming 2FA is not
 enabled on the accout).
 
-    $ BITWARDEN_PASS="<password>" python convert.py -o <path to output kdbx>
+    $ BITWARDEN_PASS="<password>" bw2kp -o <path to output kdbx>
 
 ### Local File
 
 You can use a local json export (unencrypted) of the BitWarden vault.
 [Instructions for exporting a vault][7].
 
-    $ python convert.py -i <path to vault json> -o <path to output kdbx>
+    $ bw2kp <path to vault json> -o <path to output kdbx>
 
 
 ## Testing
