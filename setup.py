@@ -3,12 +3,12 @@
 from setuptools import setup
 
 setup(name="bitwarden-to-keepass",
-      version="v0.1.5",
+      version="v0.1.6",
       description="Convert BitWarden Vault into a KeePass Database (kdbx)",
       long_description=open('README.md', 'rb').read().decode('utf-8'),
       long_description_content_type="text/markdown",
-      author="k3karthic",
-      author_email="k3.karthic@protonmail.ch",
+      author="k3karthic, firecat53",
+      author_email="k3.karthic@protonmail.ch, firecat4153@gmail.com",
       url="https://github.com/k3karthic/bitwarden-to-keepass",
       download_url="https://github.com/k3karthic/bitwarden-to-keepass/tarball/v0.1.5",
       py_modules=["convert"],
