@@ -42,31 +42,43 @@ any conflicts with other applications named `convert.py`, the script is named
 1. Install the script (including dependencies) to ~/.local/bin/bw2kp:
    (RECOMMENDED)
    
+```
     $ pip install --user .
     $ bw2kp -o bitwarden.kdbx
-    
+```   
+   
 OR
 
 2. Install the Python dependencies of the script using pip and run in place:
 
+```
     $ pip install -r requirements.txt
     $ ./convert.py -o bitwarden.kdbx
+```
 
 OR
 
 3. Install into a venv:
-    
+   
+```
     $ python -m venv .venv
     $ source .venv/bin/activate
     $ pip install .
     $ deactivate
     $ .venv/bin/bw2kp -o bitwarden.kdbx
+```
 
 ## Usage
 
-    convert.py [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
-    OR (if application is installed via pip)
-    bw2kp [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
+```
+   $ convert.py [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
+```
+ 
+ OR (if application is installed via pip)
+ 
+```
+   $ bw2kp [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
+```
 
 ### Options
 
