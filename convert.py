@@ -337,4 +337,4 @@ if __name__ == "__main__":
         if res not in ["Y", "y"]:
             sys.exit()
 
-    convert(args)
+    convert(vars(args))
