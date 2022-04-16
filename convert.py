@@ -37,7 +37,7 @@ class BitWarden:
         subprocess.run(
             ["bw", "sync"],
             input=self.password.encode("utf-8"),
-            capture_output=False,
+            capture_output=True,
             check=False,
         )
 
