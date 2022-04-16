@@ -85,6 +85,8 @@ OR
 * `-i --input` input filename (unencrypted JSON) (optional)
 * `-o --output` output kdbx filename
 * `-r --replace` don't ask before replacing output file if it exists
+* `-j --json` export vault as an unencrypted JSON
+* `-s --sync` sync bitwarden vault before starting the export
 
 You need to provide your password only once at the start. The password for the
 Keepass database will be the same as your Bitwarden password.
