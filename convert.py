@@ -324,8 +324,8 @@ def main():
         "-s",
         "--sync",
         required=False,
-        type=bool,
         default=False,
+        action='store_true',
         help="Sync BitWarden vault using cli",
     )
 
