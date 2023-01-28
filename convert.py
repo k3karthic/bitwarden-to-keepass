@@ -105,7 +105,7 @@ class KeePassConvert:
         notes = item.get("notes", "") or ""
         url = None
 
-        if len(item["login"].get("uris", [])) > 0:
+        if len(item["login"].get("uris", []) or []) > 0:
             urls = [i["uri"] or "" for i in item["login"]["uris"]]
             url = urls[0]
 
