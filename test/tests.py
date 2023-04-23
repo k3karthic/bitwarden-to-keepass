@@ -87,12 +87,7 @@ class InteractiveTest(unittest.TestCase):
         input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
         getpass_func.return_value = __MASTER_PASS__
 
-        convert.convert({
-            "sync": False,
-            "input": input_file,
-            "output": self.output,
-            "json": ''
-        })
+        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": ""})
 
         validate_keepass(self)
 
@@ -115,12 +110,7 @@ class NonInteractiveTest(unittest.TestCase):
 
         input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
 
-        convert.convert({
-            "sync": False,
-            "input": input_file,
-            "output": self.output,
-            "json": ''
-        })
+        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": ""})
 
         validate_keepass(self)
 
@@ -141,16 +131,9 @@ class DuplicateTest(unittest.TestCase):
     def test_convert(self):
         """Entrypoint for test case"""
 
-        input_file = os.path.join(
-            os.path.dirname(__file__), "resources", "test_duplicate.json"
-        )
+        input_file = os.path.join(os.path.dirname(__file__), "resources", "test_duplicate.json")
 
-        convert.convert({
-            "sync": False,
-            "input": input_file,
-            "output": self.output,
-            "json": ''
-        })
+        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": ""})
 
         # Load KeePass
         kpo = pykeepass.PyKeePass(self.output, password=__MASTER_PASS__)
@@ -190,12 +173,7 @@ class ExportTest(unittest.TestCase):
         input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
         _, json_output = tempfile.mkstemp()
 
-        convert.convert({
-            "sync": False,
-            "input": input_file,
-            "output": self.output,
-            "json": json_output
-        })
+        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": json_output})
 
         self.assertTrue(os.path.exists(json_output))
         with open(os.path.expanduser(json_output), "r", encoding="utf-8") as f_handle:

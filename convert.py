@@ -85,11 +85,7 @@ class BitWarden:
         """Export JSON vault"""
 
         with open(os.path.expanduser(output), "w", encoding="utf-8") as f_handle:
-            f_handle.write(json.dumps({
-                "encrypted": False,
-                "folders": self.folders,
-                "items": self.items
-            }))
+            f_handle.write(json.dumps({"encrypted": False, "folders": self.folders, "items": self.items}))
 
 
 class KeePassConvert:
@@ -126,9 +122,7 @@ class KeePassConvert:
         notes = item.get("notes", "") or ""
 
         # Add card info to the notes
-        notes = notes + (
-            "\n".join([f"{i}: {j}" for i, j in item.get("card", "").items()])
-        )
+        notes = notes + ("\n".join([f"{i}: {j}" for i, j in item.get("card", "").items()]))
 
         return (
             f"{item['name']} - Card",
@@ -143,9 +137,7 @@ class KeePassConvert:
         notes = item.get("notes", "") or ""
 
         # Add identity info to the notes
-        notes = notes + (
-            "\n".join([f"{i}: {j}" for i, j in item.get("identity", "").items()])
-        )
+        notes = notes + ("\n".join([f"{i}: {j}" for i, j in item.get("identity", "").items()]))
 
         return f"{item['name']} - Identity", "", "", "", notes
 
@@ -212,9 +204,7 @@ class KeePassConvert:
             title, username, password, url, notes = self.__item_to_entry(item)
 
             # The combination of group_id, title & username must be unique
-            seen_key = "".join(
-                (group_id or "", title, username if username is not None else "")
-            )
+            seen_key = "".join((group_id or "", title, username if username is not None else ""))
             seen_entries[seen_key] += 1
 
             # Add a suffix in the following format for duplicate entries
@@ -222,9 +212,7 @@ class KeePassConvert:
             if seen_entries[seen_key] > 1:
                 title = "".join((title, " (", str(seen_entries[seen_key] - 1), ")"))
 
-            self.kp_db.add_entry(
-                dest_group, title, username, password, url=url, notes=notes
-            )
+            self.kp_db.add_entry(dest_group, title, username, password, url=url, notes=notes)
 
     def save(self):
         """Save the KeePass database"""
@@ -297,9 +285,7 @@ def convert(params):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "-i", "--input", required=False, help="BitWarden unencrypted JSON file"
-    )
+    parser.add_argument("-i", "--input", required=False, help="BitWarden unencrypted JSON file")
 
     parser.add_argument("-o", "--output", required=True, help="Output kdbx file path")
 
@@ -317,7 +303,7 @@ if __name__ == "__main__":
         "--json",
         required=False,
         type=str,
-        default='',
+        default="",
         help="Export BitWarden vault as a JSON file",
     )
 
