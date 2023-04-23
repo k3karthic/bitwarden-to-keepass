@@ -282,7 +282,7 @@ def convert(params):
 ##
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--input", required=False, help="BitWarden unencrypted JSON file")
@@ -311,8 +311,8 @@ if __name__ == "__main__":
         "-s",
         "--sync",
         required=False,
-        type=bool,
         default=False,
+        action="store_true",
         help="Sync BitWarden vault using cli",
     )
 
@@ -324,3 +324,7 @@ if __name__ == "__main__":
             sys.exit()
 
     convert(vars(args))
+
+
+if __name__ == "__main__":
+    main()

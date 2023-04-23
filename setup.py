@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="bitwarden-to-keepass",
-    version="v0.1.7",
+    version="v0.1.9",
     description="Convert BitWarden Vault into a KeePass Database (kdbx)",
     long_description=open("README.md", "rb").read().decode("utf-8"),
     long_description_content_type="text/markdown",
