@@ -5,7 +5,6 @@ description = ""
 authors = ["k3karthic <k3.karthic@gmail.com>", "Scott Hansen <firecat4153@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "bitwarden_to_keepass"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
