@@ -1,119 +1,129 @@
 {
-  "encrypted": false,
-  "folders": [
-    {
-      "id": "44f010a1-7543-4905-9868-4b8db7049efd",
-      "name": "folder1"
-    },
-    {
-      "id": "785d1f52-673b-4571-933e-9b72ed0c8e12",
-      "name": "folder2"
-    }
-  ],
-  "items": [
-    {
-      "id": "e1a62a06-7ec7-4c1d-b5f3-f995afc88761",
-      "organizationId": null,
-      "folderId": null,
-      "type": 1,
-      "reprompt": 0,
-      "name": "pass1",
-      "notes": null,
-      "favorite": false,
-      "login": {
-        "uris": [
-          {
-            "match": null,
-            "uri": "https://localhost"
-          },
-          {
-            "match": null,
-            "uri": "https://127.0.0.1"
-          }
-        ],
-        "username": "admin",
-        "password": "123456",
-        "totp": null
-      },
-      "collectionIds": null
-    },
-    {
-      "id": "dde52f0a-f884-415b-829e-3094a284f22b",
-      "organizationId": null,
-      "folderId": "44f010a1-7543-4905-9868-4b8db7049efd",
-      "type": 1,
-      "reprompt": 0,
-      "name": "pass1",
-      "notes": null,
-      "favorite": false,
-      "login": {
-        "uris": [
-          {
-            "match": null,
-            "uri": "https://localhost"
-          },
-          {
-            "match": null,
-            "uri": "https://127.0.0.1"
-          }
-        ],
-        "username": "admin",
-        "password": "123456",
-        "totp": null
-      },
-      "collectionIds": null
-    },
-    {
-      "id": "15576f7e-3b81-4d4b-b8bf-b285d5242efa",
-      "organizationId": null,
-      "folderId": "785d1f52-673b-4571-933e-9b72ed0c8e12",
-      "type": 1,
-      "reprompt": 0,
-      "name": "pass1",
-      "notes": null,
-      "favorite": false,
-      "login": {
-        "uris": [
-          {
-            "match": null,
-            "uri": "https://localhost2"
-          },
-          {
-            "match": null,
-            "uri": "https://127.0.0.1"
-          }
-        ],
-        "username": "admin",
-        "password": "123457",
-        "totp": null
-      },
-      "collectionIds": null
-    },
-    {
-      "id": "c7cb221f-26c1-4f28-8eda-4b48c50625cc",
-      "organizationId": null,
-      "folderId": "785d1f52-673b-4571-933e-9b72ed0c8e12",
-      "type": 1,
-      "reprompt": 0,
-      "name": "pass1",
-      "notes": null,
-      "favorite": false,
-      "login": {
-        "uris": [
-          {
-            "match": null,
-            "uri": "https://localhost3"
-          },
-          {
-            "match": null,
-            "uri": "https://127.0.0.1"
-          }
-        ],
-        "username": "admin",
-        "password": "123458",
-        "totp": null
-      },
-      "collectionIds": null
-    }
-  ]
+    "encrypted": false,
+    "folders":
+    [
+        {
+            "id": "44f010a1-7543-4905-9868-4b8db7049efd",
+            "name": "folder1"
+        },
+        {
+            "id": "785d1f52-673b-4571-933e-9b72ed0c8e12",
+            "name": "folder2"
+        }
+    ],
+    "items":
+    [
+        {
+            "id": "e1a62a06-7ec7-4c1d-b5f3-f995afc88761",
+            "organizationId": null,
+            "folderId": null,
+            "type": 1,
+            "reprompt": 0,
+            "name": "pass1",
+            "notes": null,
+            "favorite": false,
+            "login":
+            {
+                "uris":
+                [
+                    {
+                        "match": null,
+                        "uri": "https://localhost"
+                    },
+                    {
+                        "match": null,
+                        "uri": "https://127.0.0.1"
+                    }
+                ],
+                "username": "admin",
+                "password": "123456",
+                "totp": null
+            },
+            "collectionIds": null
+        },
+        {
+            "id": "dde52f0a-f884-415b-829e-3094a284f22b",
+            "organizationId": null,
+            "folderId": "44f010a1-7543-4905-9868-4b8db7049efd",
+            "type": 1,
+            "reprompt": 0,
+            "name": "pass1",
+            "notes": null,
+            "favorite": false,
+            "login":
+            {
+                "uris":
+                [
+                    {
+                        "match": null,
+                        "uri": "https://localhost"
+                    },
+                    {
+                        "match": null,
+                        "uri": "https://127.0.0.1"
+                    }
+                ],
+                "username": "admin",
+                "password": "123456",
+                "totp": null
+            },
+            "collectionIds": null
+        },
+        {
+            "id": "15576f7e-3b81-4d4b-b8bf-b285d5242efa",
+            "organizationId": null,
+            "folderId": "785d1f52-673b-4571-933e-9b72ed0c8e12",
+            "type": 1,
+            "reprompt": 0,
+            "name": "pass1",
+            "notes": null,
+            "favorite": false,
+            "login":
+            {
+                "uris":
+                [
+                    {
+                        "match": null,
+                        "uri": "https://localhost2"
+                    },
+                    {
+                        "match": null,
+                        "uri": "https://127.0.0.1"
+                    }
+                ],
+                "username": "admin",
+                "password": "123457",
+                "totp": null
+            },
+            "collectionIds": null
+        },
+        {
+            "id": "c7cb221f-26c1-4f28-8eda-4b48c50625cc",
+            "organizationId": null,
+            "folderId": "785d1f52-673b-4571-933e-9b72ed0c8e12",
+            "type": 1,
+            "reprompt": 0,
+            "name": "pass1",
+            "notes": null,
+            "favorite": false,
+            "login":
+            {
+                "uris":
+                [
+                    {
+                        "match": null,
+                        "uri": "https://localhost3"
+                    },
+                    {
+                        "match": null,
+                        "uri": "https://127.0.0.1"
+                    }
+                ],
+                "username": "admin",
+                "password": "123458",
+                "totp": null
+            },
+            "collectionIds": null
+        }
+    ]
 }

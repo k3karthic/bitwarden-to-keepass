@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 import pykeepass
 
-import convert
+from bitwarden_to_keepass import convert
 
 ##
 # Globals
@@ -64,6 +64,8 @@ def validate_keepass(self):
     self.assertEqual(pass2.username, "admin2")
     self.assertEqual(pass2.password, "123458")
     self.assertEqual(pass2.url, "https://localhost3")
+
+    return kpo
 
 
 ##
@@ -182,11 +184,20 @@ class ExportTest(unittest.TestCase):
 
                 self.assertFalse(obj["encrypted"])
                 self.assertEqual(len(obj["folders"]), 2)
-                self.assertEqual(len(obj["items"]), 4)
+                self.assertEqual(len(obj["items"]), 5)
             except json.decoder.JSONDecodeError as err:
                 self.fail(err)
 
-        validate_keepass(self)
+        kpo = validate_keepass(self)
+
+        # Validate totp
+        totp = kpo.find_entries(title="totp test", first=True)
+        self.assertIsNotNone(totp)
+
+        self.assertEqual(totp.username, "username@example.com")
+        self.assertEqual(totp.password, "testpasword!")
+        self.assertEqual(totp.url, "https://account.proton.me/login")
+        self.assertEqual(totp.otp, "XY7MXDNK5ZEKJT4Y")
 
     def tearDown(self):
         if os.path.exists(self.output):

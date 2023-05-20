@@ -110,12 +110,13 @@ class KeePassConvert:
 
         username = item["login"].get("username", "") or ""
         password = item["login"].get("password", "") or ""
+        totp = item["login"].get("totp", "") or ""
 
-        return title, username, password, url, notes
+        return title, username, password, url, notes, totp
 
     @staticmethod
     def __convert_note(item):
-        return f"{item['name']} - Secure Note", "", "", "", item.get("notes", "") or ""
+        return f"{item['name']} - Secure Note", "", "", "", item.get("notes", "") or "", ""
 
     @staticmethod
     def __convert_card(item):
@@ -130,6 +131,7 @@ class KeePassConvert:
             item.get("card", {}).get("number", "") or "",
             "",
             notes,
+            "",
         )
 
     @staticmethod
@@ -139,7 +141,7 @@ class KeePassConvert:
         # Add identity info to the notes
         notes = notes + ("\n".join([f"{i}: {j}" for i, j in item.get("identity", "").items()]))
 
-        return f"{item['name']} - Identity", "", "", "", notes
+        return f"{item['name']} - Identity", "", "", "", notes, ""
 
     @classmethod
     def __item_to_entry(cls, item):
@@ -201,7 +203,7 @@ class KeePassConvert:
                 group_id = item["folderId"]
                 dest_group = self.groups[group_id]
 
-            title, username, password, url, notes = self.__item_to_entry(item)
+            title, username, password, url, notes, totp = self.__item_to_entry(item)
 
             # The combination of group_id, title & username must be unique
             seen_key = "".join((group_id or "", title, username if username is not None else ""))
@@ -212,7 +214,7 @@ class KeePassConvert:
             if seen_entries[seen_key] > 1:
                 title = "".join((title, " (", str(seen_entries[seen_key] - 1), ")"))
 
-            self.kp_db.add_entry(dest_group, title, username, password, url=url, notes=notes)
+            self.kp_db.add_entry(dest_group, title, username, password, url=url, notes=notes, otp=totp)
 
     def save(self):
         """Save the KeePass database"""

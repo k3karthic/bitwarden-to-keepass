@@ -30,7 +30,7 @@ collision.
 ## Requirements
 
 Software required to run the script,
-* Python 3.7+
+* Python 3.9+
 * [BitWarden CLI][3]
 
 ## Installation
@@ -49,16 +49,7 @@ any conflicts with other applications named `convert.py`, the script is named
    
 OR
 
-2. Install the Python dependencies of the script using pip and run in place:
-
-```
-    $ pip install -r requirements.txt
-    $ ./convert.py -o bitwarden.kdbx
-```
-
-OR
-
-3. Install into a venv:
+2. Install into a venv:
    
 ```
     $ python -m venv .venv
@@ -66,6 +57,16 @@ OR
     $ pip install .
     $ deactivate
     $ .venv/bin/bw2kp -o bitwarden.kdbx
+```
+
+OR
+
+3. Install using poetry:
+   
+```
+    $ poetry install
+    $ poetry shell
+    $ ./bitwarden_to_keepass/convert.py -o bitwarden.kdbx
 ```
 
 ## Usage

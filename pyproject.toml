@@ -1,15 +1,17 @@
 [tool.poetry]
-name = "bitwarden-to-keepass"
-version = "0.1.7"
-description = ""
+name = "bitwarden_to_keepass"
+version = "1.0.0"
+description = "Convert BitWarden Vault into a KeePass Database (kdbx)"
 authors = ["k3karthic <k3.karthic@gmail.com>", "Scott Hansen <firecat4153@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
+[tool.poetry.scripts]
+bw2kp = "bitwarden_to_keepass.convert:main"
+
 [tool.poetry.dependencies]
 python = "^3.9"
-pykeepass = "^4.0.3"
-
+pykeepass = "^4.0.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
