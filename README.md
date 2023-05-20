@@ -94,7 +94,7 @@ Keepass database will be the same as your Bitwarden password.
 
 ![screenshot of run](assets/screenshot.png)
 
-[![asciicast](https://asciinema.org/a/449042.svg)](https://asciinema.org/a/449042)
+[![asciicast](https://asciinema.org/a/586109.svg)](https://asciinema.org/a/586109)
 
 ### Non-Interactive
 
