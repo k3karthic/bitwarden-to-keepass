@@ -115,7 +115,7 @@ enabled on the accout).
 You can use a local json export (unencrypted) of the BitWarden vault.
 [Instructions for exporting a vault][7].
 
-    $ bw2kp <path to vault json> -o <path to output kdbx>
+    $ bw2kp -i <path to vault json> -o <path to output kdbx>
 
 
 ## Testing
