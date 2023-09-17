@@ -35,6 +35,12 @@ Software required to run the script,
 
 ## Installation
 
+Download all of the files from this repository using either of the methods below,
+1. Get a zip file of the latest release from the [GitHub Releases](https://github.com/k3karthic/bitwarden-to-keepass/releases) or [Codeberg Releases](https://github.com/k3karthic/bitwarden-to-keepass/releases) page.
+2. Clone the repository using git.
+
+Open a terminal and navigate to the folder with the downloaded files.
+
 The script can be run as is, or installed using pip, venv and/or pipx. To avoid
 any conflicts with other applications named `convert.py`, the script is named
 `bw2kp` when installed via pip or setup.py.
