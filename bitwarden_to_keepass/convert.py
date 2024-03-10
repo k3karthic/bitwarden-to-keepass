@@ -199,7 +199,7 @@ class KeePassConvert:
         for item in items_list:
             group_id = "root"
             dest_group = self.kp_db.root_group
-            if item["folderId"] in self.groups:
+            if item["folderId"] in self.groups and self.groups[item["folderId"]] is not None:
                 group_id = item["folderId"]
                 dest_group = self.groups[group_id]
 
