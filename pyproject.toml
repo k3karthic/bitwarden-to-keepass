@@ -14,7 +14,7 @@ python = "^3.9"
 pykeepass = "^4.0.4"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
+black = "^24.3.0"
 
 [build-system]
 requires = ["poetry-core"]
