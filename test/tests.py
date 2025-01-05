@@ -204,6 +204,37 @@ class ExportTest(unittest.TestCase):
             os.unlink(self.output)
 
 
+class NoFolderTest(unittest.TestCase):
+    """Test if convert.py can handle vault with no folders"""
+
+    def setUp(self):
+        os.environ["BITWARDEN_PASS"] = __MASTER_PASS__
+
+        _, output = tempfile.mkstemp()
+        self.output = output
+
+    def test_convert(self):
+        """Entrypoint for test case"""
+
+        input_file = os.path.join(os.path.dirname(__file__), "resources", "test_no_folders.json")
+
+        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": ""})
+
+        # Load KeePass
+        kpo = pykeepass.PyKeePass(self.output, password=__MASTER_PASS__)
+
+        pass1 = kpo.find_entries(title="totp test", first=True)
+        self.assertIsNotNone(pass1)
+
+        self.assertEqual(pass1.username, "username@example.com")
+        self.assertEqual(pass1.password, "testpasword!")
+        self.assertEqual(pass1.url, "https://account.proton.me/login")
+
+    def tearDown(self):
+        if os.path.exists(self.output):
+            os.unlink(self.output)
+
+
 ##
 # Main
 ##

@@ -1,0 +1,34 @@
+{
+    "encrypted": false,
+    "items":
+    [
+        {
+            "id": "0e3fba19-afa9-4f20-b053-b00800b06916",
+            "organizationId": null,
+            "type": 1,
+            "reprompt": 0,
+            "name": "totp test",
+            "notes": null,
+            "favorite": false,
+            "login":
+            {
+                "uris":
+                [
+                    {
+                        "match": null,
+                        "uri": "https://account.proton.me/login"
+                    }
+                ],
+                "username": "username@example.com",
+                "password": "testpasword!",
+                "totp": "XY7MXDNK5ZEKJT4Y",
+                "passwordRevisionDate": null
+            },
+            "collectionIds":
+            [],
+            "revisionDate": "2023-05-20T10:42:17.406Z",
+            "creationDate": "2023-05-20T10:42:17.406Z",
+            "deletedDate": null
+        }
+    ]
+}

@@ -45,7 +45,7 @@ class BitWarden:
         """List folders from bw cli or provided vault"""
 
         if self.vault is not None:
-            self.folders = self.vault["folders"]
+            self.folders = self.vault.get("folders", [])
             return self.folders
 
         run_out = subprocess.run(
@@ -199,7 +199,7 @@ class KeePassConvert:
         for item in items_list:
             group_id = "root"
             dest_group = self.kp_db.root_group
-            if item["folderId"] in self.groups and self.groups[item["folderId"]] is not None:
+            if "folderId" in item and item["folderId"] in self.groups and self.groups[item["folderId"]] is not None:
                 group_id = item["folderId"]
                 dest_group = self.groups[group_id]
 
