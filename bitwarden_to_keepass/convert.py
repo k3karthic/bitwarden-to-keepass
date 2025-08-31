@@ -143,6 +143,32 @@ class KeePassConvert:
 
         return f"{item['name']} - Identity", "", "", "", notes, ""
 
+    @staticmethod
+    def __convert_ssh_key(item):
+        notes = item.get("notes", "") or ""
+        ssh_key_info = item.get("sshKey", {})
+        public_key = ssh_key_info.get("publicKey", "") or ""
+        fingerprint = ssh_key_info.get("keyFingerprint", "") or ""
+
+        note_parts = []
+        if notes:
+            note_parts.append(notes)
+        if fingerprint:
+            note_parts.append(f"Fingerprint: {fingerprint}")
+        if public_key:
+            note_parts.append(f"Public Key: {public_key}")
+
+        notes = "\n".join(note_parts)
+
+        return (
+            f"{item['name']} - SSH Key",
+            "",  # username
+            ssh_key_info.get("privateKey", "") or "",  # password
+            "",  # url
+            notes,
+            "",  # totp
+        )
+
     @classmethod
     def __item_to_entry(cls, item):
         """Call the appropriate helper function based on the item type"""
@@ -160,6 +186,9 @@ class KeePassConvert:
 
         if item_type == 4:
             return cls.__convert_identity(item)
+
+        if item_type == 5:
+            return cls.__convert_ssh_key(item)
 
         raise Exception(f"Unknown item type: {item_type}")
 
