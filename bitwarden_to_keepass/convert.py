@@ -262,23 +262,30 @@ def parse_input_json(filename):
     if not filename:
         return None
 
-    with open(os.path.expanduser(filename), "r", encoding="utf-8") as fname:
-        input_str = fname.read()
+    if filename == "-":
+        input_str = sys.stdin.read()
+    else:
+        with open(os.path.expanduser(filename), "r", encoding="utf-8") as fname:
+            input_str = fname.read()
 
-        try:
-            vault = json.loads(input_str)
-            if vault["encrypted"] is True:
-                print("Unsupported: exported json file is encrypted")
-                sys.exit(-1)
-        except json.decoder.JSONDecodeError as err:
-            print(err)
+    try:
+        vault = json.loads(input_str)
+        if vault["encrypted"] is True:
+            print("Unsupported: exported json file is encrypted")
             sys.exit(-1)
+    except json.decoder.JSONDecodeError as err:
+        print(err)
+        sys.exit(-1)
 
-        return vault
+    return vault
 
 
 def convert(params):
     """Main entrypoint for the script"""
+
+    if params.get("input") == "-" and params.get("sync"):
+        print("Cannot use --sync with stdin input.", file=sys.stderr)
+        sys.exit(1)
 
     if "BITWARDEN_PASS" in os.environ:
         password = os.environ["BITWARDEN_PASS"]
@@ -316,7 +323,7 @@ def convert(params):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--input", required=False, help="BitWarden unencrypted JSON file")
+    parser.add_argument("-i", "--input", required=False, help="BitWarden unencrypted JSON file. Use '-' for stdin.")
 
     parser.add_argument("-o", "--output", required=True, help="Output kdbx file path")
 
