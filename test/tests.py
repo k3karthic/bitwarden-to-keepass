@@ -121,6 +121,51 @@ class NonInteractiveTest(unittest.TestCase):
             os.unlink(self.output)
 
 
+class StdinTest(unittest.TestCase):
+    """Test if convert.py can handle json from stdin"""
+
+    def setUp(self):
+        os.environ["BITWARDEN_PASS"] = __MASTER_PASS__
+
+        _, output = tempfile.mkstemp()
+        self.output = output
+
+    @patch("sys.stdin", create=True)
+    def test_convert(self, stdin_mock):
+        """Entrypoint for test case"""
+
+        input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
+        with open(input_file, "r", encoding="utf-8") as f_handle:
+            stdin_mock.read.return_value = f_handle.read()
+
+        convert.convert({"sync": False, "input": "-", "output": self.output, "json": ""})
+
+        validate_keepass(self)
+
+    def tearDown(self):
+        if os.path.exists(self.output):
+            os.unlink(self.output)
+
+
+class StdinSyncFailTest(unittest.TestCase):
+    """Test that using --sync with stdin input fails"""
+
+    def setUp(self):
+        os.environ["BITWARDEN_PASS"] = __MASTER_PASS__
+        _, self.output = tempfile.mkstemp()
+
+    def test_convert_fails(self):
+        """Test that convert() exits when --sync and --input - are used"""
+        params = {"sync": True, "input": "-", "output": self.output, "json": ""}
+        with self.assertRaises(SystemExit) as cm:
+            convert.convert(params)
+        self.assertEqual(cm.exception.code, 1)
+
+    def tearDown(self):
+        if os.path.exists(self.output):
+            os.unlink(self.output)
+
+
 class DuplicateTest(unittest.TestCase):
     """Test if convert.py can handle multiple entries with the same title and username"""
 
@@ -233,6 +278,99 @@ class NoFolderTest(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(self.output):
             os.unlink(self.output)
+
+
+class TestSSHKeyConversion(unittest.TestCase):
+    """Test conversion of Bitwarden SSH key items"""
+
+    def test_full_ssh_key(self):
+        """Tests conversion of a standard SSH key item."""
+        item = {
+            "name": "test_ssh",
+            "type": 5,
+            "notes": "Initial notes.",
+            "sshKey": {
+                "privateKey": "PRIVATE_KEY_DATA",
+                "publicKey": "PUBLIC_KEY_DATA",
+                "keyFingerprint": "FINGERPRINT_DATA",
+            },
+        }
+        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        self.assertEqual(title, "test_ssh - SSH Key")
+        self.assertEqual(username, "")
+        self.assertEqual(password, "PRIVATE_KEY_DATA")
+        self.assertEqual(url, "")
+        expected_notes = "Initial notes.\nFingerprint: FINGERPRINT_DATA\nPublic Key: PUBLIC_KEY_DATA"
+        self.assertEqual(notes, expected_notes)
+        self.assertEqual(totp, "")
+
+    def test_ssh_key_no_notes(self):
+        """Tests conversion of an SSH key item with no initial notes."""
+        item = {
+            "name": "test_ssh_no_notes",
+            "type": 5,
+            "notes": None,
+            "sshKey": {
+                "privateKey": "PRIVATE_KEY_DATA",
+                "publicKey": "PUBLIC_KEY_DATA",
+                "keyFingerprint": "FINGERPRINT_DATA",
+            },
+        }
+        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        self.assertEqual(title, "test_ssh_no_notes - SSH Key")
+        self.assertEqual(password, "PRIVATE_KEY_DATA")
+        expected_notes = "Fingerprint: FINGERPRINT_DATA\nPublic Key: PUBLIC_KEY_DATA"
+        self.assertEqual(notes, expected_notes)
+
+    def test_ssh_key_missing_public_key(self):
+        """Tests conversion of an SSH key item missing a public key."""
+        item = {
+            "name": "test_ssh_no_public",
+            "type": 5,
+            "notes": "Some notes.",
+            "sshKey": {"privateKey": "PRIVATE_KEY_DATA", "keyFingerprint": "FINGERPRINT_DATA"},
+        }
+        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        self.assertEqual(title, "test_ssh_no_public - SSH Key")
+        self.assertEqual(password, "PRIVATE_KEY_DATA")
+        expected_notes = "Some notes.\nFingerprint: FINGERPRINT_DATA"
+        self.assertEqual(notes, expected_notes)
+
+    def test_ssh_key_missing_fingerprint(self):
+        """Tests conversion of an SSH key item missing a fingerprint."""
+        item = {
+            "name": "test_ssh_no_fingerprint",
+            "type": 5,
+            "notes": "Some notes.",
+            "sshKey": {"privateKey": "PRIVATE_KEY_DATA", "publicKey": "PUBLIC_KEY_DATA"},
+        }
+        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        self.assertEqual(title, "test_ssh_no_fingerprint - SSH Key")
+        self.assertEqual(password, "PRIVATE_KEY_DATA")
+        expected_notes = "Some notes.\nPublic Key: PUBLIC_KEY_DATA"
+        self.assertEqual(notes, expected_notes)
+
+    def test_ssh_key_missing_private_key(self):
+        """Tests conversion of an SSH key item missing a private key."""
+        item = {
+            "name": "test_ssh_no_private",
+            "type": 5,
+            "notes": "Some notes.",
+            "sshKey": {"publicKey": "PUBLIC_KEY_DATA", "keyFingerprint": "FINGERPRINT_DATA"},
+        }
+        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        self.assertEqual(title, "test_ssh_no_private - SSH Key")
+        self.assertEqual(password, "")
+        expected_notes = "Some notes.\nFingerprint: FINGERPRINT_DATA\nPublic Key: PUBLIC_KEY_DATA"
+        self.assertEqual(notes, expected_notes)
+
+    def test_ssh_key_empty_sshkey_object(self):
+        """Tests conversion of an SSH key item with an empty sshKey object."""
+        item = {"name": "test_ssh_empty", "type": 5, "notes": "Some notes.", "sshKey": {}}
+        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        self.assertEqual(title, "test_ssh_empty - SSH Key")
+        self.assertEqual(password, "")
+        self.assertEqual(notes, "Some notes.")
 
 
 ##

@@ -143,6 +143,32 @@ class KeePassConvert:
 
         return f"{item['name']} - Identity", "", "", "", notes, ""
 
+    @staticmethod
+    def __convert_ssh_key(item):
+        notes = item.get("notes", "") or ""
+        ssh_key_info = item.get("sshKey", {})
+        public_key = ssh_key_info.get("publicKey", "") or ""
+        fingerprint = ssh_key_info.get("keyFingerprint", "") or ""
+
+        note_parts = []
+        if notes:
+            note_parts.append(notes)
+        if fingerprint:
+            note_parts.append(f"Fingerprint: {fingerprint}")
+        if public_key:
+            note_parts.append(f"Public Key: {public_key}")
+
+        notes = "\n".join(note_parts)
+
+        return (
+            f"{item['name']} - SSH Key",
+            "",  # username
+            ssh_key_info.get("privateKey", "") or "",  # password
+            "",  # url
+            notes,
+            "",  # totp
+        )
+
     @classmethod
     def __item_to_entry(cls, item):
         """Call the appropriate helper function based on the item type"""
@@ -160,6 +186,9 @@ class KeePassConvert:
 
         if item_type == 4:
             return cls.__convert_identity(item)
+
+        if item_type == 5:
+            return cls.__convert_ssh_key(item)
 
         raise Exception(f"Unknown item type: {item_type}")
 
@@ -233,23 +262,30 @@ def parse_input_json(filename):
     if not filename:
         return None
 
-    with open(os.path.expanduser(filename), "r", encoding="utf-8") as fname:
-        input_str = fname.read()
+    if filename == "-":
+        input_str = sys.stdin.read()
+    else:
+        with open(os.path.expanduser(filename), "r", encoding="utf-8") as fname:
+            input_str = fname.read()
 
-        try:
-            vault = json.loads(input_str)
-            if vault["encrypted"] is True:
-                print("Unsupported: exported json file is encrypted")
-                sys.exit(-1)
-        except json.decoder.JSONDecodeError as err:
-            print(err)
+    try:
+        vault = json.loads(input_str)
+        if vault["encrypted"] is True:
+            print("Unsupported: exported json file is encrypted")
             sys.exit(-1)
+    except json.decoder.JSONDecodeError as err:
+        print(err)
+        sys.exit(-1)
 
-        return vault
+    return vault
 
 
 def convert(params):
     """Main entrypoint for the script"""
+
+    if params.get("input") == "-" and params.get("sync"):
+        print("Cannot use --sync with stdin input.", file=sys.stderr)
+        sys.exit(1)
 
     if "BITWARDEN_PASS" in os.environ:
         password = os.environ["BITWARDEN_PASS"]
@@ -287,7 +323,7 @@ def convert(params):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--input", required=False, help="BitWarden unencrypted JSON file")
+    parser.add_argument("-i", "--input", required=False, help="BitWarden unencrypted JSON file. Use '-' for stdin.")
 
     parser.add_argument("-o", "--output", required=True, help="Output kdbx file path")
 

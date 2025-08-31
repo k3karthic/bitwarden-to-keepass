@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bitwarden_to_keepass"
-version = "1.0.2"
+version = "1.0.3"
 description = "Convert BitWarden Vault into a KeePass Database (kdbx)"
 authors = ["k3karthic <k3.karthic@gmail.com>", "Scott Hansen <firecat4153@gmail.com>"]
 license = "MIT"
