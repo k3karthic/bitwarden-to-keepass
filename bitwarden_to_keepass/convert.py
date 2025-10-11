@@ -243,7 +243,16 @@ class KeePassConvert:
             if seen_entries[seen_key] > 1:
                 title = "".join((title, " (", str(seen_entries[seen_key] - 1), ")"))
 
-            self.kp_db.add_entry(dest_group, title, username, password, url=url, notes=notes, otp=totp)
+            otp_value = None
+            if len(totp) > 0:
+                if totp.startswith("otpauth://"):
+                    otp_value = totp
+                else:
+                    otp_value = f"otpauth://totp/{title}:{username}?secret={totp}"
+
+            self.kp_db.add_entry(
+                dest_group, title, username, password, url=url, notes=notes, otp=otp_value
+            )
 
     def save(self):
         """Save the KeePass database"""
