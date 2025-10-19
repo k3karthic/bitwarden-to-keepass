@@ -242,7 +242,7 @@ class ExportTest(unittest.TestCase):
         self.assertEqual(totp.username, "username@example.com")
         self.assertEqual(totp.password, "testpasword!")
         self.assertEqual(totp.url, "https://account.proton.me/login")
-        self.assertEqual(totp.otp, "XY7MXDNK5ZEKJT4Y")
+        self.assertEqual(totp.otp, "otpauth://totp/totp test:username@example.com?secret=XY7MXDNK5ZEKJT4Y")
 
     def tearDown(self):
         if os.path.exists(self.output):
