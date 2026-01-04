@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-01-04
+### Changed
+- Use session key instead of passing password as input to commands
+
 ## [1.0.4] - 2025-10-19
 ### Changed
 - Change format of OTP in keepass vault is BitWarden only stores the secret (Author: https://github.com/fed1337)

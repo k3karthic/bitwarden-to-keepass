@@ -31,14 +31,41 @@ class BitWarden:
         self.folders = None
         self.items = None
 
+        self.env = os.environ.copy()
+        if self.vault is None:
+            self.env["BW_PASSWORD"] = self.password
+
+    def unlock_and_get_session(self):
+        """Unlock the vault and export the session key to the environment."""
+        try:
+            run_out = subprocess.run(
+                ["bw", "unlock", "--passwordenv", "BW_PASSWORD", "--raw"],
+                capture_output=True,
+                check=True,
+                text=True,
+                env=self.env,
+            )
+            session_key = run_out.stdout.strip()
+            if not session_key:
+                print("Failed to get session key from Bitwarden CLI.", file=sys.stderr)
+                sys.exit(1)
+            self.env["BW_SESSION"] = session_key
+            del self.env["BW_PASSWORD"]
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            print(f"Failed to unlock Bitwarden vault. Is 'bw' installed and in your PATH?", file=sys.stderr)
+            if hasattr(e, "stderr") and e.stderr:
+                print(f"Error from bw: {e.stderr.strip()}", file=sys.stderr)
+            sys.exit(1)
+
     def sync(self):
         """Sync BitWarden vault using cli"""
 
         subprocess.run(
             ["bw", "sync"],
-            input=self.password.encode("utf-8"),
             capture_output=True,
             check=False,
+            text=True,
+            env=self.env,
         )
 
     def fetch_bitwarden_folders(self):
@@ -50,15 +77,18 @@ class BitWarden:
 
         run_out = subprocess.run(
             ["bw", "list", "folders"],
-            input=self.password.encode("utf-8"),
             capture_output=True,
             check=False,
+            text=True,
+            env=self.env,
         )
 
         try:
             self.folders = json.loads(run_out.stdout)
             return self.folders
-        except json.decoder.JSONDecodeError:
+        except json.decoder.JSONDecodeError as e:
+            print(f"Failed to parse folders from Bitwarden: {e}", file=sys.stderr)
+            print(f"Received: {run_out.stdout}", file=sys.stderr)
             sys.exit(-1)
 
     def fetch_bitwarden_items(self):
@@ -70,15 +100,18 @@ class BitWarden:
 
         run_out = subprocess.run(
             ["bw", "list", "items"],
-            input=self.password.encode("utf-8"),
             capture_output=True,
             check=False,
+            text=True,
+            env=self.env,
         )
 
         try:
             self.items = json.loads(run_out.stdout)
             return self.items
-        except json.decoder.JSONDecodeError:
+        except json.decoder.JSONDecodeError as e:
+            print(f"Failed to parse items from Bitwarden: {e}", file=sys.stderr)
+            print(f"Received: {run_out.stdout}", file=sys.stderr)
             sys.exit(-1)
 
     def export_json(self, output):
@@ -250,9 +283,7 @@ class KeePassConvert:
                 else:
                     otp_value = f"otpauth://totp/{title}:{username}?secret={totp}"
 
-            self.kp_db.add_entry(
-                dest_group, title, username, password, url=url, notes=notes, otp=otp_value
-            )
+            self.kp_db.add_entry(dest_group, title, username, password, url=url, notes=notes, otp=otp_value)
 
     def save(self):
         """Save the KeePass database"""
@@ -305,6 +336,10 @@ def convert(params):
 
     kp_db = KeePassConvert(params["output"], password)
     bw_vault = BitWarden(parse_input_json(params["input"]) or None, password)
+
+    if params.get("input") is None:
+        print("Unlocking vault...")
+        bw_vault.unlock_and_get_session()
 
     if params["sync"] is True:
         print("Syncing vault...")
