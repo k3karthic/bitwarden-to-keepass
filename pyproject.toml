@@ -12,3 +12,9 @@ dependencies = [
 dev = [
     "black>=26.3.1",
 ]
+
+[project.scripts]
+bw2kp = "bitwarden_to_keepass.convert:main"
+
+[tool.setuptools.packages.find]
+include = ["bitwarden_to_keepass*"]
