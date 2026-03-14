@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.7] - 2026-03-14
+(Author: https://github.com/pauloliragtz, PR: https://github.com/k3karthic/bitwarden-to-keepass/pull/21)
+### Added
+- Add patch functionality to update an existing keepass vault with new entries from bitwarden.
+
+### Fixed
+- Fix pyproject.toml after uv upgrade (Author: https://github.com/pauloliragtz, PR: https://github.com/k3karthic/bitwarden-to-keepass/pull/21)
+
 ## [1.0.6] - 2026-03-14
 ### Changed
 - Replaced poetry with uv
