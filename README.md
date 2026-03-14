@@ -30,7 +30,7 @@ collision.
 ## Requirements
 
 Software required to run the script,
-* Python 3.9+
+* Python 3.10+
 * [BitWarden CLI][3]
 
 ## Installation
