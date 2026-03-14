@@ -51,7 +51,7 @@ wheels = [
 
 [[package]]
 name = "bitwarden-to-keepass"
-version = "0.1.0"
+version = "1.0.6"
 source = { virtual = "." }
 dependencies = [
     { name = "pykeepass" },

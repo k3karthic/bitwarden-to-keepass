@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Export BitWarden vault to a KeePass database"""
+
 # -*- coding: utf-8 -*-
 
 ##
@@ -52,7 +53,10 @@ class BitWarden:
             self.env["BW_SESSION"] = session_key
             del self.env["BW_PASSWORD"]
         except (subprocess.CalledProcessError, FileNotFoundError) as e:
-            print(f"Failed to unlock Bitwarden vault. Is 'bw' installed and in your PATH?", file=sys.stderr)
+            print(
+                f"Failed to unlock Bitwarden vault. Is 'bw' installed and in your PATH?",
+                file=sys.stderr,
+            )
             if hasattr(e, "stderr") and e.stderr:
                 print(f"Error from bw: {e.stderr.strip()}", file=sys.stderr)
             sys.exit(1)
@@ -118,7 +122,11 @@ class BitWarden:
         """Export JSON vault"""
 
         with open(os.path.expanduser(output), "w", encoding="utf-8") as f_handle:
-            f_handle.write(json.dumps({"encrypted": False, "folders": self.folders, "items": self.items}))
+            f_handle.write(
+                json.dumps(
+                    {"encrypted": False, "folders": self.folders, "items": self.items}
+                )
+            )
 
 
 class KeePassConvert:
@@ -149,14 +157,23 @@ class KeePassConvert:
 
     @staticmethod
     def __convert_note(item):
-        return f"{item['name']} - Secure Note", "", "", "", item.get("notes", "") or "", ""
+        return (
+            f"{item['name']} - Secure Note",
+            "",
+            "",
+            "",
+            item.get("notes", "") or "",
+            "",
+        )
 
     @staticmethod
     def __convert_card(item):
         notes = item.get("notes", "") or ""
 
         # Add card info to the notes
-        notes = notes + ("\n".join([f"{i}: {j}" for i, j in item.get("card", "").items()]))
+        notes = notes + (
+            "\n".join([f"{i}: {j}" for i, j in item.get("card", "").items()])
+        )
 
         return (
             f"{item['name']} - Card",
@@ -172,7 +189,9 @@ class KeePassConvert:
         notes = item.get("notes", "") or ""
 
         # Add identity info to the notes
-        notes = notes + ("\n".join([f"{i}: {j}" for i, j in item.get("identity", "").items()]))
+        notes = notes + (
+            "\n".join([f"{i}: {j}" for i, j in item.get("identity", "").items()])
+        )
 
         return f"{item['name']} - Identity", "", "", "", notes, ""
 
@@ -261,14 +280,20 @@ class KeePassConvert:
         for item in items_list:
             group_id = "root"
             dest_group = self.kp_db.root_group
-            if "folderId" in item and item["folderId"] in self.groups and self.groups[item["folderId"]] is not None:
+            if (
+                "folderId" in item
+                and item["folderId"] in self.groups
+                and self.groups[item["folderId"]] is not None
+            ):
                 group_id = item["folderId"]
                 dest_group = self.groups[group_id]
 
             title, username, password, url, notes, totp = self.__item_to_entry(item)
 
             # The combination of group_id, title & username must be unique
-            seen_key = "".join((group_id or "", title, username if username is not None else ""))
+            seen_key = "".join(
+                (group_id or "", title, username if username is not None else "")
+            )
             seen_entries[seen_key] += 1
 
             # Add a suffix in the following format for duplicate entries
@@ -283,7 +308,15 @@ class KeePassConvert:
                 else:
                     otp_value = f"otpauth://totp/{title}:{username}?secret={totp}"
 
-            self.kp_db.add_entry(dest_group, title, username, password, url=url, notes=notes, otp=otp_value)
+            self.kp_db.add_entry(
+                dest_group,
+                title,
+                username,
+                password,
+                url=url,
+                notes=notes,
+                otp=otp_value,
+            )
 
     def save(self):
         """Save the KeePass database"""
@@ -367,7 +400,12 @@ def convert(params):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--input", required=False, help="BitWarden unencrypted JSON file. Use '-' for stdin.")
+    parser.add_argument(
+        "-i",
+        "--input",
+        required=False,
+        help="BitWarden unencrypted JSON file. Use '-' for stdin.",
+    )
 
     parser.add_argument("-o", "--output", required=True, help="Output kdbx file path")
 

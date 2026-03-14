@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Unit test for convert.py"""
+
 # -*- coding: utf-8 -*-
 
 ##
@@ -89,7 +90,9 @@ class InteractiveTest(unittest.TestCase):
         input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
         getpass_func.return_value = __MASTER_PASS__
 
-        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": ""})
+        convert.convert(
+            {"sync": False, "input": input_file, "output": self.output, "json": ""}
+        )
 
         validate_keepass(self)
 
@@ -112,7 +115,9 @@ class NonInteractiveTest(unittest.TestCase):
 
         input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
 
-        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": ""})
+        convert.convert(
+            {"sync": False, "input": input_file, "output": self.output, "json": ""}
+        )
 
         validate_keepass(self)
 
@@ -138,7 +143,9 @@ class StdinTest(unittest.TestCase):
         with open(input_file, "r", encoding="utf-8") as f_handle:
             stdin_mock.read.return_value = f_handle.read()
 
-        convert.convert({"sync": False, "input": "-", "output": self.output, "json": ""})
+        convert.convert(
+            {"sync": False, "input": "-", "output": self.output, "json": ""}
+        )
 
         validate_keepass(self)
 
@@ -178,9 +185,13 @@ class DuplicateTest(unittest.TestCase):
     def test_convert(self):
         """Entrypoint for test case"""
 
-        input_file = os.path.join(os.path.dirname(__file__), "resources", "test_duplicate.json")
+        input_file = os.path.join(
+            os.path.dirname(__file__), "resources", "test_duplicate.json"
+        )
 
-        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": ""})
+        convert.convert(
+            {"sync": False, "input": input_file, "output": self.output, "json": ""}
+        )
 
         # Load KeePass
         kpo = pykeepass.PyKeePass(self.output, password=__MASTER_PASS__)
@@ -220,7 +231,14 @@ class ExportTest(unittest.TestCase):
         input_file = os.path.join(os.path.dirname(__file__), "resources", "test.json")
         _, json_output = tempfile.mkstemp()
 
-        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": json_output})
+        convert.convert(
+            {
+                "sync": False,
+                "input": input_file,
+                "output": self.output,
+                "json": json_output,
+            }
+        )
 
         self.assertTrue(os.path.exists(json_output))
         with open(os.path.expanduser(json_output), "r", encoding="utf-8") as f_handle:
@@ -242,7 +260,10 @@ class ExportTest(unittest.TestCase):
         self.assertEqual(totp.username, "username@example.com")
         self.assertEqual(totp.password, "testpasword!")
         self.assertEqual(totp.url, "https://account.proton.me/login")
-        self.assertEqual(totp.otp, "otpauth://totp/totp test:username@example.com?secret=XY7MXDNK5ZEKJT4Y")
+        self.assertEqual(
+            totp.otp,
+            "otpauth://totp/totp test:username@example.com?secret=XY7MXDNK5ZEKJT4Y",
+        )
 
     def tearDown(self):
         if os.path.exists(self.output):
@@ -261,9 +282,13 @@ class NoFolderTest(unittest.TestCase):
     def test_convert(self):
         """Entrypoint for test case"""
 
-        input_file = os.path.join(os.path.dirname(__file__), "resources", "test_no_folders.json")
+        input_file = os.path.join(
+            os.path.dirname(__file__), "resources", "test_no_folders.json"
+        )
 
-        convert.convert({"sync": False, "input": input_file, "output": self.output, "json": ""})
+        convert.convert(
+            {"sync": False, "input": input_file, "output": self.output, "json": ""}
+        )
 
         # Load KeePass
         kpo = pykeepass.PyKeePass(self.output, password=__MASTER_PASS__)
@@ -295,12 +320,16 @@ class TestSSHKeyConversion(unittest.TestCase):
                 "keyFingerprint": "FINGERPRINT_DATA",
             },
         }
-        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        title, username, password, url, notes, totp = (
+            convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        )
         self.assertEqual(title, "test_ssh - SSH Key")
         self.assertEqual(username, "")
         self.assertEqual(password, "PRIVATE_KEY_DATA")
         self.assertEqual(url, "")
-        expected_notes = "Initial notes.\nFingerprint: FINGERPRINT_DATA\nPublic Key: PUBLIC_KEY_DATA"
+        expected_notes = (
+            "Initial notes.\nFingerprint: FINGERPRINT_DATA\nPublic Key: PUBLIC_KEY_DATA"
+        )
         self.assertEqual(notes, expected_notes)
         self.assertEqual(totp, "")
 
@@ -316,7 +345,9 @@ class TestSSHKeyConversion(unittest.TestCase):
                 "keyFingerprint": "FINGERPRINT_DATA",
             },
         }
-        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        title, username, password, url, notes, totp = (
+            convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        )
         self.assertEqual(title, "test_ssh_no_notes - SSH Key")
         self.assertEqual(password, "PRIVATE_KEY_DATA")
         expected_notes = "Fingerprint: FINGERPRINT_DATA\nPublic Key: PUBLIC_KEY_DATA"
@@ -328,9 +359,14 @@ class TestSSHKeyConversion(unittest.TestCase):
             "name": "test_ssh_no_public",
             "type": 5,
             "notes": "Some notes.",
-            "sshKey": {"privateKey": "PRIVATE_KEY_DATA", "keyFingerprint": "FINGERPRINT_DATA"},
+            "sshKey": {
+                "privateKey": "PRIVATE_KEY_DATA",
+                "keyFingerprint": "FINGERPRINT_DATA",
+            },
         }
-        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        title, username, password, url, notes, totp = (
+            convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        )
         self.assertEqual(title, "test_ssh_no_public - SSH Key")
         self.assertEqual(password, "PRIVATE_KEY_DATA")
         expected_notes = "Some notes.\nFingerprint: FINGERPRINT_DATA"
@@ -342,9 +378,14 @@ class TestSSHKeyConversion(unittest.TestCase):
             "name": "test_ssh_no_fingerprint",
             "type": 5,
             "notes": "Some notes.",
-            "sshKey": {"privateKey": "PRIVATE_KEY_DATA", "publicKey": "PUBLIC_KEY_DATA"},
+            "sshKey": {
+                "privateKey": "PRIVATE_KEY_DATA",
+                "publicKey": "PUBLIC_KEY_DATA",
+            },
         }
-        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        title, username, password, url, notes, totp = (
+            convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        )
         self.assertEqual(title, "test_ssh_no_fingerprint - SSH Key")
         self.assertEqual(password, "PRIVATE_KEY_DATA")
         expected_notes = "Some notes.\nPublic Key: PUBLIC_KEY_DATA"
@@ -356,18 +397,32 @@ class TestSSHKeyConversion(unittest.TestCase):
             "name": "test_ssh_no_private",
             "type": 5,
             "notes": "Some notes.",
-            "sshKey": {"publicKey": "PUBLIC_KEY_DATA", "keyFingerprint": "FINGERPRINT_DATA"},
+            "sshKey": {
+                "publicKey": "PUBLIC_KEY_DATA",
+                "keyFingerprint": "FINGERPRINT_DATA",
+            },
         }
-        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        title, username, password, url, notes, totp = (
+            convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        )
         self.assertEqual(title, "test_ssh_no_private - SSH Key")
         self.assertEqual(password, "")
-        expected_notes = "Some notes.\nFingerprint: FINGERPRINT_DATA\nPublic Key: PUBLIC_KEY_DATA"
+        expected_notes = (
+            "Some notes.\nFingerprint: FINGERPRINT_DATA\nPublic Key: PUBLIC_KEY_DATA"
+        )
         self.assertEqual(notes, expected_notes)
 
     def test_ssh_key_empty_sshkey_object(self):
         """Tests conversion of an SSH key item with an empty sshKey object."""
-        item = {"name": "test_ssh_empty", "type": 5, "notes": "Some notes.", "sshKey": {}}
-        title, username, password, url, notes, totp = convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        item = {
+            "name": "test_ssh_empty",
+            "type": 5,
+            "notes": "Some notes.",
+            "sshKey": {},
+        }
+        title, username, password, url, notes, totp = (
+            convert.KeePassConvert._KeePassConvert__item_to_entry(item)
+        )
         self.assertEqual(title, "test_ssh_empty - SSH Key")
         self.assertEqual(password, "")
         self.assertEqual(notes, "Some notes.")
