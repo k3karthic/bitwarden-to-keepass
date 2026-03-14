@@ -67,12 +67,11 @@ OR
 
 OR
 
-3. Install using poetry:
+3. Install using uv:
    
 ```
-    $ poetry install
-    $ poetry shell
-    $ ./bitwarden_to_keepass/convert.py -o bitwarden.kdbx
+    $ uv install
+    $ uv run python ./bitwarden_to_keepass/convert.py -o bitwarden.kdbx
 ```
 
 ## Usage
