@@ -318,6 +318,72 @@ class KeePassConvert:
                 otp=otp_value,
             )
 
+    def apply_patch(self, patch_path, patch_password):
+        """
+        Apply entries from a patch kdbx into the current database.
+
+        An entry from the patch is added only if no entry with the same
+        (group name, title, username) already exists in the destination db.
+        Groups present in the patch but missing in the destination are created.
+
+        Returns a tuple (added, skipped) with counts.
+        """
+        print(f"Applying patch from: {patch_path}")
+
+        try:
+            patch_db = pykeepass.PyKeePass(patch_path, password=patch_password)
+        except Exception as e:
+            print(f"Failed to open patch file: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Build a set of (group_name, title, username) that already exist
+        existing = set()
+        for entry in self.kp_db.entries:
+            group_name = entry.group.name if entry.group else ""
+            existing.add((group_name, entry.title or "", entry.username or ""))
+
+        added = 0
+        skipped = 0
+
+        for entry in patch_db.entries:
+            patch_group_name = entry.group.name if entry.group else ""
+            key = (patch_group_name, entry.title or "", entry.username or "")
+
+            if key in existing:
+                print(f"  SKIP (already exists): [{patch_group_name}] {entry.title} / {entry.username}")
+                skipped += 1
+                continue
+
+            dest_group = self._get_or_create_group(patch_group_name)
+
+            self.kp_db.add_entry(
+                dest_group,
+                entry.title or "",
+                entry.username or "",
+                entry.password or "",
+                url=entry.url,
+                notes=entry.notes,
+                otp=entry.otp if entry.otp else None,
+            )
+
+            print(f"  ADD: [{patch_group_name}] {entry.title} / {entry.username}")
+            existing.add(key)
+            added += 1
+
+        print(f"Patch applied: {added} added, {skipped} skipped.")
+        return added, skipped
+
+    def _get_or_create_group(self, group_name):
+        """Return the root group if group_name is empty/root, otherwise find or create a top-level group."""
+        if not group_name or group_name == self.kp_db.root_group.name:
+            return self.kp_db.root_group
+
+        existing = self.kp_db.find_groups(name=group_name, first=True)
+        if existing:
+            return existing
+
+        return self.kp_db.add_group(self.kp_db.root_group, group_name)
+
     def save(self):
         """Save the KeePass database"""
 
@@ -386,6 +452,24 @@ def convert(params):
 
     print("")
 
+    # --- Patch step ---
+    patch_path = params.get("patch")
+    if patch_path:
+        patch_path = os.path.expanduser(patch_path)
+        if not os.path.exists(patch_path):
+            print(f"Patch file not found: {patch_path}", file=sys.stderr)
+            sys.exit(1)
+
+        patch_password_env = params.get("patch_password_env") or "PATCH_PASS"
+        if patch_password_env in os.environ:
+            patch_password = os.environ[patch_password_env]
+        else:
+            patch_password = getpass.getpass(f"Password for patch file ({os.path.basename(patch_path)}): ")
+
+        print("")
+        kp_db.apply_patch(patch_path, patch_password)
+        print("")
+
     kp_db.save()
 
     if len(params["json"]) > 0:
@@ -434,6 +518,28 @@ def main():
         default=False,
         action="store_true",
         help="Sync BitWarden vault using cli",
+    )
+
+    parser.add_argument(
+        "-p",
+        "--patch",
+        required=False,
+        type=str,
+        default=None,
+        help=(
+            "Path to a KeePass (.kdbx) patch file whose entries will be merged "
+            "into the output. Entries that already exist (same group + title + username) "
+            "are skipped. Password is read from the env var PATCH_PASS or prompted interactively."
+        ),
+    )
+
+    parser.add_argument(
+        "--patch-password-env",
+        required=False,
+        type=str,
+        default="PATCH_PASS",
+        dest="patch_password_env",
+        help="Environment variable holding the patch kdbx password (default: PATCH_PASS)",
     )
 
     args = parser.parse_args()
