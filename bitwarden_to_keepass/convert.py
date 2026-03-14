@@ -350,7 +350,9 @@ class KeePassConvert:
             key = (patch_group_name, entry.title or "", entry.username or "")
 
             if key in existing:
-                print(f"  SKIP (already exists): [{patch_group_name}] {entry.title} / {entry.username}")
+                print(
+                    f"  SKIP (already exists): [{patch_group_name}] {entry.title} / {entry.username}"
+                )
                 skipped += 1
                 continue
 
@@ -464,7 +466,9 @@ def convert(params):
         if patch_password_env in os.environ:
             patch_password = os.environ[patch_password_env]
         else:
-            patch_password = getpass.getpass(f"Password for patch file ({os.path.basename(patch_path)}): ")
+            patch_password = getpass.getpass(
+                f"Password for patch file ({os.path.basename(patch_path)}): "
+            )
 
         print("")
         kp_db.apply_patch(patch_path, patch_password)

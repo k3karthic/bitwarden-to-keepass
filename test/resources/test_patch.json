@@ -1,0 +1,81 @@
+
+{
+    "encrypted": false,
+    "folders": [
+        {
+            "id": "f1a1b1c1-d1e1-f1a1-b1c1-d1e1f1a1b1c1",
+            "name": "folder1"
+        },
+        {
+            "id": "f3",
+            "name": "folder3"
+        }
+    ],
+    "items": [
+        {
+            "id": "6",
+            "folderId": "f3",
+            "type": 1,
+            "name": "pass_in_folder3",
+            "notes": "notes for pass_in_folder3",
+            "login": {
+                "uris": [
+                    {
+                        "uri": "https://localhost/folder3"
+                    }
+                ],
+                "username": "admin_f3",
+                "password": "password_f3"
+            }
+        },
+        {
+            "id": "7",
+            "folderId": "f1a1b1c1-d1e1-f1a1-b1c1-d1e1f1a1b1c1",
+            "type": 1,
+            "name": "new_pass_in_folder1",
+            "notes": "notes for new_pass_in_folder1",
+            "login": {
+                "uris": [
+                    {
+                        "uri": "https://localhost/folder1/new"
+                    }
+                ],
+                "username": "admin_f1_new",
+                "password": "password_f1_new"
+            }
+        },
+        {
+            "id": "1",
+            "folderId": "f1a1b1c1-d1e1-f1a1-b1c1-d1e1f1a1b1c1",
+            "type": 1,
+            "name": "pass1",
+            "notes": "some notes",
+            "login": {
+                "uris": [
+                    {
+                        "match": null,
+                        "uri": "https://localhost"
+                    }
+                ],
+                "username": "admin",
+                "password": "123456"
+            }
+        },
+        {
+            "id": "8",
+            "folderId": null,
+            "type": 1,
+            "name": "pass_in_root",
+            "notes": "notes for pass_in_root",
+            "login": {
+                "uris": [
+                    {
+                        "uri": "https://localhost/root"
+                    }
+                ],
+                "username": "admin_root",
+                "password": "password_root"
+            }
+        }
+    ]
+}

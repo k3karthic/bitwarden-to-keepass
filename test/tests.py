@@ -428,6 +428,93 @@ class TestSSHKeyConversion(unittest.TestCase):
         self.assertEqual(notes, "Some notes.")
 
 
+class PatchTest(unittest.TestCase):
+    """Test if convert.py can handle patching a database"""
+
+    def setUp(self):
+        os.environ["BITWARDEN_PASS"] = __MASTER_PASS__
+        os.environ["PATCH_PASS"] = __MASTER_PASS__
+
+        _, self.output = tempfile.mkstemp()
+        _, self.patch_kdbx = tempfile.mkstemp()
+
+    @patch("getpass.getpass", create=True)
+    def test_convert(self, getpass_func):
+        """Entrypoint for test case"""
+        getpass_func.return_value = __MASTER_PASS__
+
+        # 1. Create the patch database
+        patch_input_file = os.path.join(
+            os.path.dirname(__file__), "resources", "test_patch.json"
+        )
+        convert.convert(
+            {
+                "sync": False,
+                "input": patch_input_file,
+                "output": self.patch_kdbx,
+                "json": "",
+                "replace": True,
+            }
+        )
+
+        # 2. Run the main conversion with the patch
+        main_input_file = os.path.join(
+            os.path.dirname(__file__), "resources", "test.json"
+        )
+        convert.convert(
+            {
+                "sync": False,
+                "input": main_input_file,
+                "output": self.output,
+                "json": "",
+                "patch": self.patch_kdbx,
+                "patch_password_env": "PATCH_PASS",
+                "replace": True,
+            }
+        )
+
+        # 3. Validate contents
+        kpo = pykeepass.PyKeePass(self.output, password=__MASTER_PASS__)
+
+        # Check that the new group "folder3" was created
+        folder3 = kpo.find_groups(name="folder3", first=True)
+        self.assertIsNotNone(folder3)
+        self.assertEqual(len(folder3.entries), 1)
+
+        # Check for the new entry in folder3
+        pass_in_folder3 = kpo.find_entries(
+            title="pass_in_folder3", first=True, group=folder3
+        )
+        self.assertIsNotNone(pass_in_folder3)
+        self.assertEqual(pass_in_folder3.username, "admin_f3")
+
+        # Check for the new entry in the existing group "folder1"
+        folder1 = kpo.find_groups(name="folder1", first=True)
+        self.assertIsNotNone(folder1)
+        # 1 original + 1 new
+        self.assertEqual(len(folder1.entries), 2)
+        new_pass_in_folder1 = kpo.find_entries(
+            title="new_pass_in_folder1", first=True, group=folder1
+        )
+        self.assertIsNotNone(new_pass_in_folder1)
+        self.assertEqual(new_pass_in_folder1.username, "admin_f1_new")
+
+        # Check for the new entry in the root group
+        pass_in_root = kpo.find_entries(title="pass_in_root", first=True)
+        self.assertIsNotNone(pass_in_root)
+        self.assertEqual(pass_in_root.username, "admin_root")
+        self.assertEqual(pass_in_root.group.name, "Root")
+
+        # Check that the original entries are still there, plus the new ones
+        self.assertEqual(len(kpo.entries), 8)  # 5 original + 3 new
+
+    def tearDown(self):
+        if os.path.exists(self.output):
+            os.unlink(self.output)
+        if os.path.exists(self.patch_kdbx):
+            os.unlink(self.patch_kdbx)
+
+
 ##
 # Main
 ##
