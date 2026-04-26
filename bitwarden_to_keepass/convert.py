@@ -8,11 +8,13 @@
 ##
 
 import argparse
+import base64
 import getpass
 import json
 import os
 import subprocess
 import sys
+import uuid
 from collections import Counter
 
 import pykeepass
@@ -132,6 +134,13 @@ class BitWarden:
 class KeePassConvert:
     """Convert BitWarden items to KeePass entries"""
 
+    PASSKEY_TAG = "Passkey"
+    PASSKEY_CREDENTIAL_ID = "KPEX_PASSKEY_CREDENTIAL_ID"
+    PASSKEY_PRIVATE_KEY_PEM = "KPEX_PASSKEY_PRIVATE_KEY_PEM"
+    PASSKEY_RELYING_PARTY = "KPEX_PASSKEY_RELYING_PARTY"
+    PASSKEY_USERNAME = "KPEX_PASSKEY_USERNAME"
+    PASSKEY_USER_HANDLE = "KPEX_PASSKEY_USER_HANDLE"
+
     def __init__(self, output, password):
         self.kp_db = pykeepass.create_database(output, password=password)
         self.groups = None
@@ -244,6 +253,125 @@ class KeePassConvert:
 
         raise Exception(f"Unknown item type: {item_type}")
 
+    @classmethod
+    def __get_passkeys(cls, item):
+        """Return Bitwarden FIDO2 credentials for a login item."""
+
+        if item.get("type") != 1:
+            return []
+
+        return item.get("login", {}).get("fido2Credentials") or []
+
+    @staticmethod
+    def __base64url_decode(value):
+        """Decode Bitwarden's unpadded base64url strings."""
+
+        if value is None:
+            return b""
+
+        value = str(value).replace("-", "+").replace("_", "/")
+        value += "=" * (-len(value) % 4)
+        return base64.b64decode(value)
+
+    @classmethod
+    def __bitwarden_key_to_pem(cls, key_value):
+        """Convert a Bitwarden PKCS#8 base64url private key to PEM (KeePassXC format)."""
+
+        der = cls.__base64url_decode(key_value)
+        pem_body = base64.b64encode(der).decode("ascii")
+        return f"-----BEGIN PRIVATE KEY-----{pem_body}-----END PRIVATE KEY-----"
+
+    @classmethod
+    def __bitwarden_credential_id_to_kp(cls, credential_id):
+        """Convert Bitwarden credentialId to KeePassXC format.
+
+        Bitwarden exports credentialId as a UUID string (e.g.
+        'a3e15f8b-27c1-42ae-90cf-a615ad87854f'). KeePassXC expects the raw
+        bytes encoded as base64url without padding.
+        """
+        if not credential_id:
+            return ""
+
+        # Bitwarden exports credentialId as a UUID string
+        if len(credential_id) == 36 and credential_id.count("-") == 4:
+            try:
+                raw_bytes = uuid.UUID(credential_id).bytes
+                return base64.urlsafe_b64encode(raw_bytes).rstrip(b"=").decode("ascii")
+            except ValueError:
+                pass
+
+        # Fallback: already base64url-encoded raw bytes
+        uuid_bytes = cls.__base64url_decode(credential_id)
+        if len(uuid_bytes) == 16:
+            return base64.urlsafe_b64encode(uuid_bytes).rstrip(b"=").decode("ascii")
+        return credential_id
+
+    @classmethod
+    def __apply_passkey(cls, entry, passkey):
+        """Store a Bitwarden passkey using KeePassXC-compatible attributes."""
+
+        if not passkey:
+            return
+
+        key_value = passkey.get("keyValue")
+        credential_id = passkey.get("credentialId")
+        rp_id = passkey.get("rpId")
+
+        if not key_value or not credential_id or not rp_id:
+            return
+
+        username = (
+            passkey.get("userName")
+            or passkey.get("userDisplayName")
+            or entry.username
+            or ""
+        )
+        user_handle = passkey.get("userHandle") or ""
+
+        entry.set_custom_property(cls.PASSKEY_USERNAME, username)
+        entry.set_custom_property(
+            cls.PASSKEY_CREDENTIAL_ID,
+            cls.__bitwarden_credential_id_to_kp(credential_id),
+            protect=True,
+        )
+        entry.set_custom_property(
+            cls.PASSKEY_PRIVATE_KEY_PEM,
+            cls.__bitwarden_key_to_pem(key_value),
+            protect=True,
+        )
+        entry.set_custom_property(cls.PASSKEY_RELYING_PARTY, rp_id)
+        entry.set_custom_property(cls.PASSKEY_USER_HANDLE, user_handle, protect=True)
+
+        tags = list(entry.tags or [])
+        if cls.PASSKEY_TAG not in tags:
+            tags.append(cls.PASSKEY_TAG)
+            entry.tags = tags
+
+    def __add_entry(
+        self,
+        dest_group,
+        title,
+        username,
+        password,
+        url,
+        notes,
+        otp_value,
+        passkey=None,
+    ):
+        """Add a KeePass entry and attach passkey metadata when present."""
+
+        entry = self.kp_db.add_entry(
+            dest_group,
+            title,
+            username,
+            password,
+            url=url,
+            notes=notes,
+            otp=otp_value,
+        )
+        self.__apply_passkey(entry, passkey)
+        return entry
+
     def folders_to_groups(self, folders_list):
         """Create KeePass folder structure based on BitWarden folders"""
 
@@ -308,15 +436,33 @@ class KeePassConvert:
                 else:
                     otp_value = f"otpauth://totp/{title}:{username}?secret={totp}"
 
-            self.kp_db.add_entry(
+            passkeys = self.__get_passkeys(item)
+            self.__add_entry(
                 dest_group,
                 title,
                 username,
                 password,
-                url=url,
-                notes=notes,
-                otp=otp_value,
+                url,
+                notes,
+                otp_value,
+                passkeys[0] if passkeys else None,
             )
+
+            for passkey in passkeys[1:]:
+                seen_entries[seen_key] += 1
+                passkey_title = "".join(
+                    (title, " (", str(seen_entries[seen_key] - 1), ")")
+                )
+                self.__add_entry(
+                    dest_group,
+                    passkey_title,
+                    username,
+                    password,
+                    url,
+                    notes,
+                    otp_value,
+                    passkey,
+                )
 
     def apply_patch(self, patch_path, patch_password):
         """
@@ -358,7 +504,7 @@ class KeePassConvert:
 
             dest_group = self._get_or_create_group(patch_group_name)
 
-            self.kp_db.add_entry(
+            added_entry = self.kp_db.add_entry(
                 dest_group,
                 entry.title or "",
                 entry.username or "",
@@ -366,7 +512,15 @@ class KeePassConvert:
                 url=entry.url,
                 notes=entry.notes,
                 otp=entry.otp if entry.otp else None,
+                tags=list(entry.tags or []),
             )
+
+            for prop_key, prop_value in entry.custom_properties.items():
+                added_entry.set_custom_property(
+                    prop_key,
+                    prop_value,
+                    protect=entry.is_custom_property_protected(prop_key),
+                )
 
             print(f"  ADD: [{patch_group_name}] {entry.title} / {entry.username}")
             existing.add(key)
