@@ -9,7 +9,9 @@ cffi==2.0.0
 construct==2.10.70
     # via pykeepass
 lxml==6.1.0
-    # via pykeepass
+    # via
+    #   bitwarden-to-keepass
+    #   pykeepass
 pycparser==3.0 ; implementation_name != 'PyPy'
     # via cffi
 pycryptodomex==3.23.0
