@@ -305,6 +305,68 @@ class NoFolderTest(unittest.TestCase):
             os.unlink(self.output)
 
 
+class PasskeyTest(unittest.TestCase):
+    """Test if Bitwarden passkeys are imported as KeePassXC attributes"""
+
+    def setUp(self):
+        os.environ["BITWARDEN_PASS"] = __MASTER_PASS__
+
+        _, output = tempfile.mkstemp()
+        self.output = output
+
+    def test_convert(self):
+        """Entrypoint for test case"""
+
+        input_file = os.path.join(
+            os.path.dirname(__file__), "resources", "test_passkey.json"
+        )
+
+        convert.convert(
+            {"sync": False, "input": input_file, "output": self.output, "json": ""}
+        )
+
+        kpo = pykeepass.PyKeePass(self.output, password=__MASTER_PASS__)
+        entry = kpo.find_entries(title="webauthn.io", first=True)
+        self.assertIsNotNone(entry)
+
+        self.assertIn("Passkey", entry.tags)
+        self.assertEqual(
+            entry.get_custom_property("KPEX_PASSKEY_CREDENTIAL_ID"),
+            "o-FfiyfBQq6Qz6YVrYeFTw",
+        )
+        self.assertTrue(
+            entry.is_custom_property_protected("KPEX_PASSKEY_CREDENTIAL_ID")
+        )
+        self.assertEqual(
+            entry.get_custom_property("KPEX_PASSKEY_USERNAME"), "KPXC_BITWARDEN"
+        )
+        self.assertEqual(
+            entry.get_custom_property("KPEX_PASSKEY_RELYING_PARTY"), "webauthn.io"
+        )
+        self.assertEqual(
+            entry.get_custom_property("KPEX_PASSKEY_USER_HANDLE"),
+            "aTFtdmFnOHYtS2dxVEJ0by1rSFpLWGg0enlTVC1iUVJReDZ5czJXa3c2aw",
+        )
+        self.assertTrue(
+            entry.is_custom_property_protected("KPEX_PASSKEY_USER_HANDLE")
+        )
+
+        private_key_pem = entry.get_custom_property("KPEX_PASSKEY_PRIVATE_KEY_PEM")
+        self.assertTrue(private_key_pem.startswith("-----BEGIN PRIVATE KEY-----"))
+        self.assertTrue(private_key_pem.endswith("-----END PRIVATE KEY-----"))
+        self.assertIn(
+            "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgmr4GQQjerojF",
+            private_key_pem,
+        )
+        self.assertTrue(
+            entry.is_custom_property_protected("KPEX_PASSKEY_PRIVATE_KEY_PEM")
+        )
+
+    def tearDown(self):
+        if os.path.exists(self.output):
+            os.unlink(self.output)
+
+
 class TestSSHKeyConversion(unittest.TestCase):
     """Test conversion of Bitwarden SSH key items"""
 
