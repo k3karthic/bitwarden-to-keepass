@@ -68,22 +68,20 @@ OR
 OR
 
 3. Install using uv:
-   
+
 ```
-    $ uv install
-    $ uv run python ./bitwarden_to_keepass/convert.py -o bitwarden.kdbx
+    $ uv tool install .
+    $ bw2kp -o bitwarden.kdbx
 ```
 
 ## Usage
 
 ```
-   $ convert.py [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
-```
- 
- OR (if application is installed via pip)
- 
-```
    $ bw2kp [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
+```
+OR (if not installed as tool but run from the bitwarden_to_keepass directory)
+```
+   $ convert.py [-h] [-i INPUT FILE] [-r] -o OUTPUT FILE
 ```
 
 ### Options
