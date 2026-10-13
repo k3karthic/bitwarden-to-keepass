@@ -347,9 +347,7 @@ class PasskeyTest(unittest.TestCase):
             entry.get_custom_property("KPEX_PASSKEY_USER_HANDLE"),
             "aTFtdmFnOHYtS2dxVEJ0by1rSFpLWGg0enlTVC1iUVJReDZ5czJXa3c2aw",
         )
-        self.assertTrue(
-            entry.is_custom_property_protected("KPEX_PASSKEY_USER_HANDLE")
-        )
+        self.assertTrue(entry.is_custom_property_protected("KPEX_PASSKEY_USER_HANDLE"))
 
         private_key_pem = entry.get_custom_property("KPEX_PASSKEY_PRIVATE_KEY_PEM")
         self.assertTrue(private_key_pem.startswith("-----BEGIN PRIVATE KEY-----"))
@@ -361,6 +359,35 @@ class PasskeyTest(unittest.TestCase):
         self.assertTrue(
             entry.is_custom_property_protected("KPEX_PASSKEY_PRIVATE_KEY_PEM")
         )
+
+        for title, credential_id, username in (
+            ("webauthn.io (1)", "tML2To8rSxmmER2JBhKnfA", "KPXC_BITWARDEN_B64_COLON"),
+            ("webauthn.io (2)", "L4elEJweRnG_nkvj0gr2ZQ", "KPXC_BITWARDEN_B64_DOT"),
+        ):
+            with self.subTest(title=title):
+                passkey_entry = kpo.find_entries(title=title, first=True)
+                self.assertIsNotNone(passkey_entry)
+                assert passkey_entry is not None
+                self.assertIn("Passkey", passkey_entry.tags)
+                self.assertEqual(
+                    passkey_entry.get_custom_property("KPEX_PASSKEY_CREDENTIAL_ID"),
+                    credential_id,
+                )
+                self.assertEqual(
+                    passkey_entry.get_custom_property("KPEX_PASSKEY_USERNAME"),
+                    username,
+                )
+                self.assertEqual(
+                    passkey_entry.get_custom_property("KPEX_PASSKEY_USER_HANDLE"),
+                    "aTFtdmFnOHYtS2dxVEJ0by1rSFpLWGg0enlTVC1iUVJReDZ5czJXa3c2aw",
+                )
+                passkey_private_key_pem = passkey_entry.get_custom_property(
+                    "KPEX_PASSKEY_PRIVATE_KEY_PEM"
+                )
+                self.assertTrue(
+                    passkey_private_key_pem.startswith("-----BEGIN PRIVATE KEY-----")
+                )
+                self.assertEqual(passkey_private_key_pem, private_key_pem)
 
     def tearDown(self):
         if os.path.exists(self.output):

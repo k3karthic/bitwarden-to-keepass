@@ -27,6 +27,8 @@ import pykeepass
 class BitWarden:
     """Interact with the BitWarden CLI or JSON vault"""
 
+    BASE64_PREFIXES = ["b64:", "b64."]
+
     def __init__(self, vault, password):
         self.vault = vault
         self.password = password
@@ -268,6 +270,10 @@ class KeePassConvert:
 
         if value is None:
             return b""
+
+        for prefix in BitWarden.BASE64_PREFIXES:
+            if value.startswith(prefix):
+                value = value[len(prefix) :]
 
         value = str(value).replace("-", "+").replace("_", "/")
         value += "=" * (-len(value) % 4)

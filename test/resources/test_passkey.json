@@ -36,6 +36,36 @@
                         "userDisplayName": "KPXC Bitwarden",
                         "discoverable": "true",
                         "creationDate": "2024-05-18T00:00:00.000Z"
+                    },
+                    {
+                        "credentialId": "b64:tML2To8rSxmmER2JBhKnfA",
+                        "keyType": "public-key",
+                        "keyAlgorithm": "ECDSA",
+                        "keyCurve": "P-256",
+                        "keyValue": "b64:MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgmr4GQQjerojFuf0ZouOuUllMvAwxZSZAfB6gwDYcLiehRANCAAT0WR5zVSp6ieusvjkLkzaGc7fjGBmwpiuLPxR_d-ZjqMI9L2DKh-takp6wGt2x0n4jzr1KA352NZg0vjZX9CHh",
+                        "rpId": "webauthn.io",
+                        "userHandle": "aTFtdmFnOHYtS2dxVEJ0by1rSFpLWGg0enlTVC1iUVJReDZ5czJXa3c2aw",
+                        "userName": "KPXC_BITWARDEN_B64_COLON",
+                        "counter": "0",
+                        "rpName": "webauthn.io",
+                        "userDisplayName": "KPXC Bitwarden b64 colon",
+                        "discoverable": "true",
+                        "creationDate": "2024-05-19T00:00:00.000Z"
+                    },
+                    {
+                        "credentialId": "b64.L4elEJweRnG_nkvj0gr2ZQ",
+                        "keyType": "public-key",
+                        "keyAlgorithm": "ECDSA",
+                        "keyCurve": "P-256",
+                        "keyValue": "b64.MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgmr4GQQjerojFuf0ZouOuUllMvAwxZSZAfB6gwDYcLiehRANCAAT0WR5zVSp6ieusvjkLkzaGc7fjGBmwpiuLPxR_d-ZjqMI9L2DKh-takp6wGt2x0n4jzr1KA352NZg0vjZX9CHh",
+                        "rpId": "webauthn.io",
+                        "userHandle": "aTFtdmFnOHYtS2dxVEJ0by1rSFpLWGg0enlTVC1iUVJReDZ5czJXa3c2aw",
+                        "userName": "KPXC_BITWARDEN_B64_DOT",
+                        "counter": "0",
+                        "rpName": "webauthn.io",
+                        "userDisplayName": "KPXC Bitwarden b64 dot",
+                        "discoverable": "true",
+                        "creationDate": "2024-05-20T00:00:00.000Z"
                     }
                 ]
             },
